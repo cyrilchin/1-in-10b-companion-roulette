@@ -1,0 +1,2661 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>1 in 10 億：貓狗輪盤 — 全球伴侶動物命運模擬</title>
+  <meta name="description" content="致敬《1 in 8b.life》的單頁互動文字模擬遊戲。地球上現存約 10 億隻伴侶犬貓，點擊開局隨機轉生，體驗僅此一次的生命旅程與同秒降生對照。" />
+  <meta name="theme-color" content="#0d1117" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="1 in 10 億：貓狗輪盤 — 全球伴侶動物命運模擬" />
+  <meta property="og:description" content="地球上現存約 10 億隻犬貓。依據真實世界統計數據加權抽籤（45% 發展中街頭流浪、35% 一般工薪家庭、12% 非法繁殖場、8% 頂級家庭），體驗牠們僅此一次的生命。" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="1 in 10 億：貓狗輪盤 — 全球伴侶動物命運模擬" />
+  <meta name="twitter:description" content="依據真實統計權重轉生為全球 10 億隻犬貓之一，與同秒降生的 3 隻同梯對照生命軌跡。" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bgMain: '#0d1117',
+            bgCard: '#131922',
+            bgElevated: '#1a222d',
+            borderMuted: '#263040',
+            textMain: '#e6edf3',
+            textSub: '#8b949e',
+            textMuted: '#586069',
+            barAuto: '#6e8898',
+            barSuffer: '#9e5a5a',
+            barHappy: '#7d9c7b',
+            accentGold: '#c9a96e'
+          },
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+            serif: ['"Noto Serif TC"', 'serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      background-color: #0d1117;
+      color: #e6edf3;
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .serif-prose {
+      font-family: 'Noto Serif TC', serif;
+      line-height: 1.95;
+      letter-spacing: 0.04em;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes pulseSlow {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.9; }
+    }
+    .pulse-slow {
+      animation: pulseSlow 2.8s infinite ease-in-out;
+    }
+    .stat-bar-fill {
+      transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d1117;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #263040;
+      border-radius: 3px;
+    }
+    .poster-card {
+      background: linear-gradient(180deg, #11161d 0%, #090c10 100%);
+      border: 1px solid #2d3748;
+    }
+  </style>
+</head>
+<body class="bg-bgMain text-textMain antialiased selection:bg-slate-700 selection:text-white min-h-screen flex flex-col">
+
+  <!-- Top Navigation / Status Header -->
+  <header class="sticky top-0 z-30 bg-bgMain/90 backdrop-blur-md border-b border-borderMuted/70">
+    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-block w-2 h-2 rounded-full bg-textMain/80 pulse-slow"></span>
+        <span class="font-mono text-xs sm:text-sm tracking-widest text-textMain font-medium">1 IN 1,000,000,000</span>
+        <span class="hidden sm:inline-block text-xs text-textMuted border-l border-borderMuted pl-2.5">全球伴侶動物命運輪盤</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnOpenMatrix" type="button" class="px-2.5 py-1.5 text-xs text-textSub hover:text-textMain border border-borderMuted/80 hover:border-textSub/50 rounded transition flex items-center gap-1.5">
+          <span>數據母體</span>
+        </button>
+        <button id="btnOpenHistory" type="button" class="px-2.5 py-1.5 text-xs text-textSub hover:text-textMain border border-borderMuted/80 hover:border-textSub/50 rounded transition flex items-center gap-1.5">
+          <span>轉生紀錄</span>
+          <span id="historyCountBadge" class="font-mono text-[11px] bg-bgElevated px-1.5 py-0.2 rounded text-textSub">0</span>
+        </button>
+        <button id="btnAudioToggle" type="button" aria-label="切換音效" class="px-2.5 py-1.5 text-xs text-textSub hover:text-textMain border border-borderMuted/80 hover:border-textSub/50 rounded transition font-mono">
+          音效: 開
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-between">
+
+    <!-- ==================== VIEW 1: INTRO / TITLE SCREEN ==================== -->
+    <section id="viewIntro" class="my-auto py-4 sm:py-8 max-w-2xl mx-auto w-full fade-in">
+      <div class="border border-borderMuted bg-bgCard/70 rounded-lg p-6 sm:p-10 shadow-2xl">
+        <div class="flex items-center justify-between text-xs font-mono text-textSub mb-4">
+          <span>EARTH COMPANION SIMULATION</span>
+          <span>POPULATION ≈ 1.0 × 10⁹</span>
+        </div>
+
+        <h1 class="font-serif text-2xl sm:text-4xl font-bold tracking-wide text-textMain leading-snug mb-4">
+          1 in 10 億：貓狗輪盤
+        </h1>
+        <p class="text-xs sm:text-sm text-textSub font-mono tracking-wider mb-6 pb-6 border-b border-borderMuted/70">
+          致敬《1 in 8b.life》— 全球伴侶動物真實處境互動敘事
+        </p>
+
+        <div class="serif-prose text-sm sm:text-base text-textMain/90 space-y-4 mb-8">
+          <p>
+            此時此刻，地球上現存約 <strong class="text-white font-semibold">10 億隻</strong> 犬與貓。
+          </p>
+          <p>
+            人類習慣在社群媒體上看見受盡寵愛、擁有專屬玩具與有機鮮食的毛孩；然而從全球統計母體來看，降生為一隻伴侶動物的真實處境極其隨機且殘酷懸殊。
+          </p>
+          <p class="text-textSub text-xs sm:text-sm leading-relaxed">
+            當你按下轉生，系統將依據真實世界統計權重，將你隨機投生為 10 億分之一的靈魂——你可能降生在季風暴雨的加爾各答街頭、鐵絲網鏽蝕的非法地下繁殖籠、拴著鐵鍊的鄉村庭院，或是擁有醫療保險的北歐落地窗前。同一秒內，另外 3 隻同梯生命也將在地球不同角落展開各自的人生。
+          </p>
+        </div>
+
+        <!-- Probability Distribution Preview Bar -->
+        <div class="mb-8 bg-bgMain/80 border border-borderMuted/80 rounded p-4">
+          <div class="flex items-center justify-between text-xs text-textSub mb-2">
+            <span>全球出生環境真實權重分佈</span>
+            <span class="font-mono text-[11px]">N = 1,000,000,000</span>
+          </div>
+          <div class="w-full h-3 bg-bgElevated rounded-sm overflow-hidden flex mb-3">
+            <div class="h-full bg-[#7c5846]" style="width: 45%" title="第三世界/發展中地區流浪犬貓 45%"></div>
+            <div class="h-full bg-[#5c7285]" style="width: 35%" title="一般工薪家庭飼養 35%"></div>
+            <div class="h-full bg-[#8c4646]" style="width: 12%" title="商業繁殖場/非法工廠 12%"></div>
+            <div class="h-full bg-[#c9a96e]" style="width: 8%" title="已開發國家高收入頂級寵物 8%"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-textSub">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#7c5846] shrink-0"></span>
+              <span>發展中街頭流浪 <strong class="font-mono text-textMain">45%</strong></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#5c7285] shrink-0"></span>
+              <span>一般工薪家庭 <strong class="font-mono text-textMain">35%</strong></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#8c4646] shrink-0"></span>
+              <span>非法繁殖工廠 <strong class="font-mono text-textMain">12%</strong></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-xs bg-[#c9a96e] shrink-0"></span>
+              <span>高收入頂級家庭 <strong class="font-mono text-accentGold">8%</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Action Button -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <button id="btnStartRandom" type="button" class="flex-1 py-3.5 px-6 bg-textMain text-bgMain hover:bg-white active:scale-[0.99] font-medium text-sm sm:text-base rounded transition shadow-lg flex items-center justify-center gap-2">
+            <span>開始輪盤轉生（真實機率抽籤）</span>
+            <span class="font-mono text-xs opacity-75">→</span>
+          </button>
+          <button id="btnToggleCustomTier" type="button" class="py-3.5 px-4 bg-bgElevated hover:bg-borderMuted text-textSub hover:text-textMain text-xs sm:text-sm rounded border border-borderMuted transition">
+            指定階層體驗
+          </button>
+        </div>
+
+        <!-- Optional Custom Tier Selector (Collapsed by default) -->
+        <div id="customTierPanel" class="hidden mt-4 pt-4 border-t border-borderMuted/60">
+          <p class="text-xs text-textSub mb-2.5">觀察模式：指定開局出生背景（不影響同梯隨機對照）</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" data-tier="stray" class="btn-custom-tier text-left p-2.5 rounded border border-borderMuted hover:border-textSub bg-bgMain/60 transition flex items-center justify-between">
+              <span class="text-xs text-textMain">發展中地區流浪犬貓</span>
+              <span class="font-mono text-[11px] text-textSub">45% 機率池</span>
+            </button>
+            <button type="button" data-tier="working" class="btn-custom-tier text-left p-2.5 rounded border border-borderMuted hover:border-textSub bg-bgMain/60 transition flex items-center justify-between">
+              <span class="text-xs text-textMain">一般工薪家庭飼養</span>
+              <span class="font-mono text-[11px] text-textSub">35% 機率池</span>
+            </button>
+            <button type="button" data-tier="mill" class="btn-custom-tier text-left p-2.5 rounded border border-borderMuted hover:border-textSub bg-bgMain/60 transition flex items-center justify-between">
+              <span class="text-xs text-textMain">商業繁殖場／非法工廠</span>
+              <span class="font-mono text-[11px] text-[#c97a7a]">12% 機率池</span>
+            </button>
+            <button type="button" data-tier="elite" class="btn-custom-tier text-left p-2.5 rounded border border-borderMuted hover:border-accentGold/60 bg-bgMain/60 transition flex items-center justify-between">
+              <span class="text-xs text-accentGold">已開發國家頂級家庭 (SSR)</span>
+              <span class="font-mono text-[11px] text-accentGold">8% 機率池</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: ROULETTE ROLLING ANIMATION ==================== -->
+    <section id="viewRoulette" class="hidden my-auto py-12 max-w-xl mx-auto w-full text-center">
+      <div class="border border-borderMuted bg-bgCard/80 rounded-lg p-8 sm:p-10">
+        <p class="font-mono text-xs text-textSub tracking-widest uppercase mb-3">SOUL ASSIGNING...</p>
+        <div id="rouletteCounter" class="font-mono text-xl sm:text-2xl text-textMain mb-6 tracking-wider">
+          #000,000,000 / 1,000,000,000
+        </div>
+        <div class="h-20 flex flex-col items-center justify-center border-y border-borderMuted/60 my-4 py-3">
+          <div id="rouletteTierLabel" class="text-xs font-mono text-textSub mb-1">正在檢索地球座標...</div>
+          <div id="rouletteIdentity" class="font-serif text-lg sm:text-xl text-textMain font-semibold">---</div>
+        </div>
+        <p class="text-xs text-textMuted mt-4">同時生成 3 隻同秒降生的伴侶動物對照樣本...</p>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: MAIN GAMEPLAY SIMULATION ==================== -->
+    <section id="viewGame" class="hidden w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left / Main Column: Character Status + Narrative + Choices (7 cols on lg) -->
+        <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-5">
+
+          <!-- Identity & Core Stats Card -->
+          <div class="border border-borderMuted bg-bgCard rounded-lg p-4 sm:p-5">
+            <div class="flex flex-wrap items-start justify-between gap-2 pb-3.5 mb-3.5 border-b border-borderMuted/70">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span id="gameTierBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-bgElevated text-textSub border border-borderMuted">階層</span>
+                  <span id="gameSoulId" class="text-[11px] font-mono text-textMuted">#000,000,000</span>
+                </div>
+                <h2 id="gameCharTitle" class="font-serif text-lg sm:text-xl font-bold text-textMain">---</h2>
+                <p id="gameCharSubtitle" class="text-xs text-textSub mt-0.5">---</p>
+              </div>
+              <div class="text-right bg-bgMain/80 px-3 py-1.5 rounded border border-borderMuted/80">
+                <div class="text-[10px] font-mono text-textSub uppercase">當前年齡</div>
+                <div id="gameAgeDisplay" class="font-mono text-base sm:text-lg font-semibold text-textMain">初生 (第 0 個月)</div>
+              </div>
+            </div>
+
+            <!-- 3 Core Stat Progress Bars -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <!-- Autonomy -->
+              <div class="bg-bgMain/60 p-2.5 rounded border border-borderMuted/50">
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="text-textSub flex items-center gap-1">
+                    <span>自由度</span>
+                    <span class="font-mono text-[10px] text-textMuted">Autonomy</span>
+                  </span>
+                  <span id="valAutonomy" class="font-mono text-xs font-medium text-textMain">50</span>
+                </div>
+                <div class="w-full h-1.5 bg-bgElevated rounded-full overflow-hidden">
+                  <div id="barAutonomy" class="stat-bar-fill h-full bg-barAuto rounded-full" style="width: 50%"></div>
+                </div>
+              </div>
+
+              <!-- Suffering -->
+              <div class="bg-bgMain/60 p-2.5 rounded border border-borderMuted/50" id="cardSufferingBox">
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="text-textSub flex items-center gap-1">
+                    <span>痛苦值</span>
+                    <span class="font-mono text-[10px] text-textMuted">Suffering</span>
+                  </span>
+                  <span id="valSuffering" class="font-mono text-xs font-medium text-textMain">20</span>
+                </div>
+                <div class="w-full h-1.5 bg-bgElevated rounded-full overflow-hidden">
+                  <div id="barSuffering" class="stat-bar-fill h-full bg-barSuffer rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+
+              <!-- Happiness -->
+              <div class="bg-bgMain/60 p-2.5 rounded border border-borderMuted/50">
+                <div class="flex justify-between items-center text-xs mb-1.5">
+                  <span class="text-textSub flex items-center gap-1">
+                    <span>幸福感</span>
+                    <span class="font-mono text-[10px] text-textMuted">Happiness</span>
+                  </span>
+                  <span id="valHappiness" class="font-mono text-xs font-medium text-textMain">50</span>
+                </div>
+                <div class="w-full h-1.5 bg-bgElevated rounded-full overflow-hidden">
+                  <div id="barHappiness" class="stat-bar-fill h-full bg-barHappy rounded-full" style="width: 50%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Warning banner when Suffering > 80 -->
+            <div id="sufferingAlert" class="hidden mt-3 px-3 py-1.5 rounded bg-[#3a1d21] border border-[#7c373e] text-[#e2959c] text-xs flex items-center justify-between">
+              <span>生理警訊：痛苦值已超過 80，免疫與生命徵象瀕臨崩潰。</span>
+              <span class="font-mono text-[11px] uppercase">CRITICAL</span>
+            </div>
+
+            <!-- Accumulated Tags Row -->
+            <div class="mt-3 pt-2.5 border-t border-borderMuted/50 flex items-center flex-wrap gap-1.5" id="liveTagsContainer">
+              <span class="text-[11px] text-textMuted mr-1">生命印記：</span>
+            </div>
+          </div>
+
+          <!-- Narrative Event Box -->
+          <div class="border border-borderMuted bg-bgCard rounded-lg p-5 sm:p-8 flex flex-col justify-between min-h-[340px]">
+            <div>
+              <div class="flex items-center justify-between text-xs font-mono text-textMuted mb-4">
+                <span id="eventStageLabel">STAGE 01 · 初生記憶</span>
+                <span id="eventLocationLabel">座標</span>
+              </div>
+
+              <h3 id="eventTitle" class="font-serif text-lg sm:text-xl font-semibold text-textMain mb-4">
+                ---
+              </h3>
+
+              <div id="eventNarrative" class="serif-prose text-base sm:text-[17px] text-textMain/90 space-y-3 mb-6">
+                <!-- Literary white-sketch text injected here -->
+              </div>
+
+              <!-- Outcome Feedback Panel (Shown after choosing an option) -->
+              <div id="eventOutcomeBox" class="hidden my-5 p-4 rounded bg-bgMain/90 border-l-2 border-textSub/70 fade-in">
+                <p id="eventOutcomeText" class="serif-prose text-sm sm:text-base text-textMain/90 mb-2.5"></p>
+                <div id="eventOutcomeDeltas" class="flex flex-wrap items-center gap-2 font-mono text-xs"></div>
+              </div>
+            </div>
+
+            <!-- Interactive Choices or Next Node Button -->
+            <div class="pt-4 border-t border-borderMuted/60">
+              <div id="choicesContainer" class="flex flex-col gap-2.5">
+                <!-- Choice buttons dynamically rendered -->
+              </div>
+
+              <button id="btnNextNode" type="button" class="hidden w-full py-3.5 px-5 bg-textMain text-bgMain hover:bg-white active:scale-[0.99] font-medium text-sm sm:text-base rounded transition flex items-center justify-center gap-2">
+                <span id="btnNextNodeLabel">推進時間</span>
+                <span class="font-mono text-xs">→</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Past Log Accordion / Brief Timeline -->
+          <div class="border border-borderMuted/70 bg-bgCard/50 rounded-lg p-4">
+            <div class="text-xs font-mono text-textSub mb-2.5 flex items-center justify-between">
+              <span>生命軌跡紀錄（LIFE LOG）</span>
+              <span id="logEntryCount" class="text-[11px] text-textMuted">1 筆紀錄</span>
+            </div>
+            <div id="lifeLogList" class="space-y-2 max-h-40 overflow-y-auto pr-1 text-xs text-textSub">
+              <!-- Log items -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right / Bottom Column: 3 Same-Second Peers (5 cols on lg) -->
+        <div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-4">
+          <div class="border border-borderMuted bg-bgCard rounded-lg p-4 sm:p-5">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-borderMuted/70">
+              <div>
+                <h3 class="text-xs sm:text-sm font-semibold text-textMain flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-accentGold"></span>
+                  <span>同秒降生對照系統</span>
+                </h3>
+                <p class="text-[11px] text-textSub mt-0.5">與你同一秒誕生於地球上的另外 3 個靈魂</p>
+              </div>
+              <span class="font-mono text-[11px] text-textMuted">SYNC LIVE</span>
+            </div>
+
+            <!-- 3 Peer Cards -->
+            <div id="peersContainer" class="space-y-3">
+              <!-- Dynamically rendered 3 peers -->
+            </div>
+
+            <!-- Peer Feed Ticker -->
+            <div class="mt-4 pt-3 border-t border-borderMuted/70">
+              <div class="text-[11px] font-mono text-textMuted mb-2 uppercase">同梯命運即時簡報</div>
+              <div id="peerTickerList" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                <!-- Peer updates -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: ENDING & SUMMARY POSTER ==================== -->
+    <section id="viewEnding" class="hidden my-auto py-4 max-w-2xl mx-auto w-full fade-in">
+      <!-- B&W / High-Contrast Minimalist Summary Card -->
+      <div class="poster-card rounded-lg p-6 sm:p-9 shadow-2xl relative overflow-hidden">
+        <!-- Header Stamp -->
+        <div class="flex items-center justify-between text-[11px] font-mono text-textSub border-b border-borderMuted pb-3 mb-5">
+          <span>1 IN 1,000,000,000 · 伴侶動物生命結算</span>
+          <span id="endSoulId">#000,000,000</span>
+        </div>
+
+        <!-- Title & Cause of Death -->
+        <div class="mb-6">
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span id="endTierBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-bgElevated text-textSub border border-borderMuted">階層</span>
+            <span id="endSpeciesBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-bgMain text-textMuted border border-borderMuted/60">物種</span>
+          </div>
+          <h2 id="endCharName" class="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide mb-1">
+            ---
+          </h2>
+          <p id="endCharOrigin" class="text-xs sm:text-sm text-textSub mb-4">---</p>
+
+          <div class="grid grid-cols-2 gap-3 bg-bgMain/90 border border-borderMuted/90 rounded p-3.5">
+            <div>
+              <div class="text-[11px] text-textMuted font-mono">享年（LIFESPAN）</div>
+              <div id="endLifespan" class="font-serif text-lg sm:text-xl font-semibold text-textMain mt-0.5">---</div>
+            </div>
+            <div>
+              <div class="text-[11px] text-textMuted font-mono">生命終點（CAUSE OF DEATH）</div>
+              <div id="endDeathCause" class="font-serif text-sm sm:text-base font-medium text-[#d48b8b] mt-1">---</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Narrative Epitaph -->
+        <div class="mb-6 p-4 rounded bg-bgElevated/40 border border-borderMuted/60">
+          <p id="endEpitaph" class="serif-prose text-sm sm:text-base text-textMain/90 italic"></p>
+        </div>
+
+        <!-- Final Stats & Trajectory Chart -->
+        <div class="mb-6">
+          <div class="text-xs font-mono text-textSub mb-3 flex items-center justify-between">
+            <span>最終生命數值與一生軌跡</span>
+            <span class="text-[11px] text-textMuted">0 — 100 SCALE</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="bg-bgMain/80 border border-borderMuted/70 p-3 rounded text-center">
+              <div class="text-[11px] text-textSub mb-1">最終自由度</div>
+              <div id="endStatAuto" class="font-mono text-xl font-semibold text-barAuto">0</div>
+              <div class="w-full h-1 bg-bgElevated rounded-full mt-2 overflow-hidden">
+                <div id="endBarAuto" class="h-full bg-barAuto" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="bg-bgMain/80 border border-borderMuted/70 p-3 rounded text-center">
+              <div class="text-[11px] text-textSub mb-1">累積峰值痛苦</div>
+              <div id="endStatSuffer" class="font-mono text-xl font-semibold text-barSuffer">0</div>
+              <div class="w-full h-1 bg-bgElevated rounded-full mt-2 overflow-hidden">
+                <div id="endBarSuffer" class="h-full bg-barSuffer" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="bg-bgMain/80 border border-borderMuted/70 p-3 rounded text-center">
+              <div class="text-[11px] text-textSub mb-1">一生幸福指數</div>
+              <div id="endStatHappy" class="font-mono text-xl font-semibold text-barHappy">0</div>
+              <div class="w-full h-1 bg-bgElevated rounded-full mt-2 overflow-hidden">
+                <div id="endBarHappy" class="h-full bg-barHappy" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Life Trajectory Mini Chart -->
+          <div class="bg-bgMain/70 border border-borderMuted/60 rounded p-3">
+            <div class="flex items-center justify-between text-[10px] font-mono text-textMuted mb-1.5">
+              <span>一生數值波動曲線</span>
+              <div class="flex items-center gap-3">
+                <span class="text-barAuto">● 自由</span>
+                <span class="text-barSuffer">● 痛苦</span>
+                <span class="text-barHappy">● 幸福</span>
+              </div>
+            </div>
+            <div id="endSvgChartContainer" class="w-full h-24"></div>
+          </div>
+        </div>
+
+        <!-- Life Key Tags -->
+        <div class="mb-6">
+          <div class="text-xs font-mono text-textSub mb-2">一生關鍵標籤（LIFE TAGS）</div>
+          <div id="endTagsList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Same-Second Peers Final Comparison -->
+        <div class="mb-6 pt-4 border-t border-borderMuted/70">
+          <div class="text-xs font-mono text-textSub mb-2.5">同秒降生 3 隻同梯的最終命運對照</div>
+          <div id="endPeersSummary" class="space-y-2 text-xs"></div>
+        </div>
+
+        <!-- Cold Reality Statistical Truth -->
+        <div class="mb-7 p-4 rounded bg-[#14181f] border border-borderMuted">
+          <div class="text-[10px] font-mono text-accentGold uppercase tracking-widest mb-1">REAL WORLD STATISTIC · 現實統計真相</div>
+          <p id="endRealityQuote" class="text-xs sm:text-sm text-textMain/90 leading-relaxed"></p>
+        </div>
+
+        <!-- Copy Notice Toast -->
+        <div id="copyFeedbackToast" class="hidden mb-4 p-2.5 rounded bg-barHappy/20 border border-barHappy text-xs text-center text-textMain font-mono">
+          已複製純文字戰績至剪貼簿，可直接貼上至 X / Threads 分享。
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button id="btnCopyShareText" type="button" class="flex-1 py-3.5 px-5 bg-bgElevated hover:bg-borderMuted text-textMain border border-textSub/40 font-medium text-xs sm:text-sm rounded transition flex items-center justify-center gap-2">
+            <span>複製一生戰績（純文字版，適合發 X / Threads）</span>
+          </button>
+          <button id="btnReincarnate" type="button" class="flex-1 py-3.5 px-5 bg-textMain text-bgMain hover:bg-white font-semibold text-xs sm:text-sm rounded transition flex items-center justify-center gap-2">
+            <span>重新轉生（再抽一次）</span>
+            <span class="font-mono">↻</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-borderMuted/50 py-4 px-4 text-center text-[11px] text-textMuted font-mono">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>1 IN 10B: COMPANION ANIMAL FATE ROULETTE</span>
+      <span>以領養代替購買 · 結紮代替撲殺 · 尊重每一條僅此一次的生命</span>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL 1: DATA MATRIX INFO ==================== -->
+  <div id="modalMatrix" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-bgCard border border-borderMuted rounded-lg max-w-xl w-full p-5 sm:p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-borderMuted">
+        <h3 class="font-serif text-lg font-bold text-textMain">全球伴侶動物抽籤數據母體</h3>
+        <button id="btnCloseMatrix" type="button" class="text-xs font-mono text-textSub hover:text-white px-2 py-1 border border-borderMuted rounded">關閉 [ESC]</button>
+      </div>
+      <div class="space-y-4 text-xs sm:text-sm text-textSub leading-relaxed">
+        <p class="text-textMain/90">
+          根據世界衛生組織（WHO）、國際動物福利基金會（IFAW）與動物收容統計推估，全球現存約 7 億至 10 億隻犬與數億隻貓。牠們的出生環境大致可歸納為以下四個機率階層：
+        </p>
+        <div class="p-3 rounded bg-bgMain border border-borderMuted/80">
+          <div class="flex justify-between font-semibold text-textMain mb-1">
+            <span>1. 第三世界／發展中地區流浪犬貓</span>
+            <span class="font-mono text-[#c9967a]">機率 45%</span>
+          </div>
+          <p class="text-xs">包含東南亞街道流浪米克斯、南亞村落野狗、中東街貓、拉美貧民窟浪犬。自由度極高，但缺乏乾淨水源、食物與疫苗，高達半數幼崽在第一年內死於路殺、犬瘟熱、貓瘟或人道撲殺。</p>
+        </div>
+        <div class="p-3 rounded bg-bgMain border border-borderMuted/80">
+          <div class="flex justify-between font-semibold text-textMain mb-1">
+            <span>2. 一般工薪家庭飼養</span>
+            <span class="font-mono text-[#8ab0cc]">機率 35%</span>
+          </div>
+          <p class="text-xs">包含鄉村看門犬、亞洲都市公寓家貓、一般家庭領養米克斯。溫飽相對穩定但活動空間與自由受限；命運高度取決於飼主責任感，可能因搬家、結婚生子或老年高額醫療費而面臨棄養。</p>
+        </div>
+        <div class="p-3 rounded bg-bgMain border border-borderMuted/80">
+          <div class="flex justify-between font-semibold text-textMain mb-1">
+            <span>3. 商業繁殖場／非法幼犬幼貓工廠</span>
+            <span class="font-mono text-[#d48b8b]">機率 12%</span>
+          </div>
+          <p class="text-xs">包含法國鬥牛犬、摺耳貓、布偶貓、柴犬、茶杯犬等高價熱門品種。種公種母終生囚禁於狹小鐵絲籠中反覆交配剖腹，幼崽則面臨近親繁殖遺傳病與長途運輸折損，自由度趨近於零。</p>
+        </div>
+        <div class="p-3 rounded bg-bgMain border border-borderMuted/80">
+          <div class="flex justify-between font-semibold text-accentGold mb-1">
+            <span>4. 已開發國家高收入家庭頂級寵物 (SSR)</span>
+            <span class="font-mono text-accentGold">機率 8%</span>
+          </div>
+          <p class="text-xs">包含歐美中產家庭黃金獵犬、北歐高端全生肉餵養室內貓。享有寵物醫療保險、定期牙科與血液健檢、行為訓練師與恆溫空間，平均壽命可達 14 至 18 歲。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: REINCARNATION HISTORY ==================== -->
+  <div id="modalHistory" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-bgCard border border-borderMuted rounded-lg max-w-xl w-full p-5 sm:p-6 max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-borderMuted">
+        <div>
+          <h3 class="font-serif text-lg font-bold text-textMain">過往轉生紀錄</h3>
+          <p class="text-xs text-textSub">你在這 10 億個靈魂中曾經歷過的生命軌跡</p>
+        </div>
+        <button id="btnCloseHistory" type="button" class="text-xs font-mono text-textSub hover:text-white px-2 py-1 border border-borderMuted rounded">關閉 [ESC]</button>
+      </div>
+      <div id="historyModalContent" class="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs">
+        <!-- Populated from memory/localStorage -->
+      </div>
+      <div class="pt-3 mt-4 border-t border-borderMuted flex justify-between items-center">
+        <span id="historyStatsSummary" class="text-[11px] font-mono text-textMuted">累積轉生 0 次</span>
+        <button id="btnClearHistory" type="button" class="text-xs text-[#c97a7a] hover:underline">清除紀錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CORE SIMULATION SCRIPT ==================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* -------------------------------------------------------------------------- */
+      /* 1. WEB AUDIO SYNTHESIZER (MINIMALIST ATMOSPHERIC SOUND)                    */
+      /* -------------------------------------------------------------------------- */
+      const SoundEngine = {
+        ctx: null,
+        enabled: true,
+        init() {
+          if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+        },
+        playTick(freq = 320, duration = 0.04, type = 'sine', gainVal = 0.04) {
+          if (!this.enabled) return;
+          try {
+            this.init();
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+          } catch (e) {}
+        },
+        playChoice() {
+          this.playTick(420, 0.07, 'triangle', 0.05);
+        },
+        playStep() {
+          this.playTick(280, 0.09, 'sine', 0.05);
+        },
+        playDeath() {
+          if (!this.enabled) return;
+          try {
+            this.init();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            [220, 196, 164.8].forEach((f, idx) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(f, now + idx * 0.18);
+              gain.gain.setValueAtTime(0.05, now + idx * 0.18);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.18 + 0.9);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + idx * 0.18);
+              osc.stop(now + idx * 0.18 + 0.95);
+            });
+          } catch (e) {}
+        }
+      };
+
+      /* -------------------------------------------------------------------------- */
+      /* 2. CORE DATA MATRIX: 4 TIERS & CHARACTER ARCHETYPES                        */
+      /* -------------------------------------------------------------------------- */
+      const TIER_CONFIG = {
+        stray: {
+          id: 'stray',
+          name: '發展中地區流浪犬貓',
+          shortName: '街頭流浪',
+          weight: 45,
+          probText: '45%',
+          badgeClass: 'bg-[#2c211b] text-[#d6a78a] border-[#5c4233]',
+          avgMaxMonths: 48,
+          stepSchedule: [2, 4, 6, 9, 12, 16, 20, 24, 30, 36, 48, 60, 72],
+          archetypes: [
+            {
+              species: '犬',
+              title: '加爾各答街頭的黃色雜種犬',
+              location: '印度 · 加爾各答舊城區',
+              desc: '降生於季風積水的鐵皮屋簷下，母親是一隻左後腿微跛的瘦弱街犬。',
+              initStats: { autonomy: 88, suffering: 34, happiness: 24 },
+              initTags: ['【未曾擁有過名字】', '【街頭降生】']
+            },
+            {
+              species: '貓',
+              title: '曼谷夜市後巷的虎斑街貓',
+              location: '泰國 · 曼谷孔堤區',
+              desc: '在充滿油煙與魚腥味的排水溝旁睜開眼睛，四周是呼嘯而過的改裝機車。',
+              initStats: { autonomy: 90, suffering: 30, happiness: 28 },
+              initTags: ['【未曾擁有過名字】', '【夜市邊緣】']
+            },
+            {
+              species: '犬',
+              title: '孟買垃圾山旁的黑褐色野狗',
+              location: '印度 · 孟買郊區掩埋場',
+              desc: '伴隨著烏鴉啼叫與焚燒塑膠的刺鼻煙霧出生，同胎五隻手足有兩隻未能撐過第一週。',
+              initStats: { autonomy: 92, suffering: 42, happiness: 18 },
+              initTags: ['【未曾擁有過名字】', '【荒野求生】']
+            },
+            {
+              species: '貓',
+              title: '開羅舊城區的單耳白底斑貓',
+              location: '埃及 · 開羅老市集',
+              desc: '藏身在乾燥炎熱的石磚縫隙中，靠著香料鋪與肉攤掉落的碎屑維生。',
+              initStats: { autonomy: 85, suffering: 32, happiness: 26 },
+              initTags: ['【未曾擁有過名字】', '【石縫微光】']
+            },
+            {
+              species: '犬',
+              title: '馬尼拉港口的瘦骨米克斯',
+              location: '菲律賓 · 馬尼拉碼頭區',
+              desc: '海風鹹濕，貨櫃車日夜輾過碎石路面，你在廢棄輪胎堆裡學會了辨認人類的腳步聲。',
+              initStats: { autonomy: 86, suffering: 36, happiness: 22 },
+              initTags: ['【未曾擁有過名字】', '【港口浪跡】']
+            },
+            {
+              species: '貓',
+              title: '聖保羅貧民窟屋頂的三花幼貓',
+              location: '巴西 · 聖保羅邊陲社區',
+              desc: '紅磚與石棉瓦交錯的迷宮上，電線密集如網，你在雷雨夜裡緊貼著母親冰冷的肚皮。',
+              initStats: { autonomy: 89, suffering: 35, happiness: 25 },
+              initTags: ['【未曾擁有過名字】', '【屋頂浪子】']
+            }
+          ]
+        },
+
+        working: {
+          id: 'working',
+          name: '一般工薪家庭飼養',
+          shortName: '工薪家庭',
+          weight: 35,
+          probText: '35%',
+          badgeClass: 'bg-[#1c2833] text-[#94b8d7] border-[#344e66]',
+          avgMaxMonths: 156,
+          stepSchedule: [2, 6, 12, 24, 42, 60, 84, 108, 132, 156, 180],
+          archetypes: [
+            {
+              species: '犬',
+              title: '屏東鄉村庭院的鐵鍊看門黑犬',
+              location: '台灣 · 屏東農村透天厝',
+              desc: '被取名為「小黑」，脖子套著一圈沉重的鐵鍊，活動半徑是門口那條兩公尺長的生鏽鐵絲。',
+              initStats: { autonomy: 32, suffering: 24, happiness: 45 },
+              initTags: ['【名字叫小黑】', '【兩公尺鐵鍊】']
+            },
+            {
+              species: '貓',
+              title: '新北老公寓的圈養橘白家貓',
+              location: '台灣 · 新北頂樓加蓋套房',
+              desc: '飼主是一名早出晚歸的年輕上班族，你在八坪大的房間裡對著鐵窗外的麻雀發呆。',
+              initStats: { autonomy: 38, suffering: 14, happiness: 58 },
+              initTags: ['【八坪的世界】', '【鐵窗觀鳥】']
+            },
+            {
+              species: '犬',
+              title: '胡志明市雜貨店門口的黃白米克斯',
+              location: '越南 · 胡志明市郊區小鎮',
+              desc: '平時睡在塑膠椅下吃人類剩飯，偶爾能去街角晃晃，但從未接種過任何疫苗。',
+              initStats: { autonomy: 48, suffering: 20, happiness: 52 },
+              initTags: ['【剩飯溫飽】', '【看店日常】']
+            },
+            {
+              species: '貓',
+              title: '吉隆坡組屋家庭領養的賓士貓',
+              location: '馬來西亞 · 吉隆坡平民組屋',
+              desc: '家裡有三個吵鬧的孩童，飼料碗裡裝著廉價的大賣場彩色乾糧，但夜晚總有一盞溫暖的客廳燈。',
+              initStats: { autonomy: 40, suffering: 18, happiness: 56 },
+              initTags: ['【彩色乾糧】', '【孩童喧鬧】']
+            },
+            {
+              species: '犬',
+              title: '台中工業區廠房的護衛混種犬',
+              location: '台灣 · 台中外圍鐵皮工廠',
+              desc: '白天在機台轟鳴聲中蜷縮於角落，夜晚工廠大門拉下後，獨自守著空曠冰冷的廠區。',
+              initStats: { autonomy: 36, suffering: 22, happiness: 46 },
+              initTags: ['【工廠守夜】', '【機台轟鳴】']
+            }
+          ]
+        },
+
+        mill: {
+          id: 'mill',
+          name: '商業繁殖場／非法幼犬幼貓工廠',
+          shortName: '非法繁殖場',
+          weight: 12,
+          probText: '12%',
+          badgeClass: 'bg-[#331a1e] text-[#e09199] border-[#663038]',
+          avgMaxMonths: 72,
+          stepSchedule: [2, 6, 12, 20, 30, 40, 50, 60, 72, 84],
+          archetypes: [
+            {
+              species: '犬',
+              title: '非法地下繁殖場的奶油色法國鬥牛犬種母',
+              location: '東亞 · 偏遠山區鐵皮繁殖場',
+              desc: '天生短吻導致每一次呼吸都伴隨著雜音。你被關在雙層鐵絲籠裡，腳掌因為從未踩過平地而紅腫潰爛。',
+              initStats: { autonomy: 4, suffering: 66, happiness: 10 },
+              initTags: ['【終生未見草地】', '【編號 A-19 種母】', '【短吻呼吸困難】']
+            },
+            {
+              species: '貓',
+              title: '後院繁殖籠裡的蘇格蘭摺耳種貓',
+              location: '東亞 · 都市暗巷公寓繁殖室',
+              desc: '人類迷戀你向下摺疊的雙耳，卻無視你體內正在鈣化增生的軟骨基因。籠外終年開著昏黃省電燈泡。',
+              initStats: { autonomy: 5, suffering: 68, happiness: 8 },
+              initTags: ['【終生未見草地】', '【軟骨遺傳病】', '【鐵絲籠囚徒】']
+            },
+            {
+              species: '犬',
+              title: '高密度繁殖架上的赤色豆柴種公',
+              location: '亞洲 · 農地違建繁殖倉庫',
+              desc: '三層交疊的鐵籠裡排泄物氣味濃烈，你的聲帶在五個月大時被無麻醉剪除以防吠叫引來檢舉。',
+              initStats: { autonomy: 3, suffering: 72, happiness: 6 },
+              initTags: ['【終生未見草地】', '【聲帶遭剪除】', '【未曾擁有過名字】']
+            },
+            {
+              species: '貓',
+              title: '網紅寵物批發場的藍雙色布偶貓',
+              location: '亞洲 · 商業繁殖配種中心',
+              desc: '擁有湛藍如寶石的雙眼與凌亂糾結的長毛，一生唯一的任務是在發情期被推進配種箱。',
+              initStats: { autonomy: 6, suffering: 62, happiness: 12 },
+              initTags: ['【終生未見草地】', '【配種機器】']
+            },
+            {
+              species: '犬',
+              title: '夜市拍賣箱滯銷的茶杯型貴賓犬',
+              location: '東南亞 · 地下寵物批發市場',
+              desc: '為了追求極致嬌小而被刻意限食與早產，低血糖讓你的四肢時常在玻璃展示櫃裡微微顫抖。',
+              initStats: { autonomy: 8, suffering: 64, happiness: 11 },
+              initTags: ['【玻璃展示櫃】', '【先天低血糖】']
+            }
+          ]
+        },
+
+        elite: {
+          id: 'elite',
+          name: '已開發國家高收入家庭頂級寵物 (SSR)',
+          shortName: '高收入家庭 SSR',
+          weight: 8,
+          probText: '8% · SSR',
+          badgeClass: 'bg-[#2b2618] text-[#e3c485] border-[#665530]',
+          avgMaxMonths: 192,
+          stepSchedule: [3, 9, 18, 36, 60, 90, 120, 150, 174, 192, 210],
+          archetypes: [
+            {
+              species: '犬',
+              title: '加州帕羅奧圖別墅的黃金獵犬',
+              location: '美國 · 加州矽谷住宅區',
+              desc: '擁有專屬草坪、全額寵物醫療保險與記憶泡棉床墊。名字叫「Oliver」，每週末固定前往紅木森林步道奔跑。',
+              initStats: { autonomy: 64, suffering: 5, happiness: 88 },
+              initTags: ['【專屬醫療保險】', '【有機鮮食】', '【名字叫 Oliver】']
+            },
+            {
+              species: '貓',
+              title: '斯德哥爾摩設計公寓的全生肉餵養森林貓',
+              location: '瑞典 · 斯德哥爾摩市中心',
+              desc: '室內裝有訂製實木貓跳台與恆溫地暖，每半年由家庭獸醫到府進行血液與牙科超音波檢查。',
+              initStats: { autonomy: 56, suffering: 4, happiness: 90 },
+              initTags: ['【恆溫地暖】', '【生肉營養配餐】', '【名字叫 Freja】']
+            },
+            {
+              species: '犬',
+              title: '蘇黎世湖畔莊園的伯恩山犬',
+              location: '瑞士 · 蘇黎世湖區',
+              desc: '微晶片登記在冊，從小接受正向行為訓練，從未聽過人類大聲斥責，阿爾卑斯山的微風伴你入眠。',
+              initStats: { autonomy: 68, suffering: 6, happiness: 89 },
+              initTags: ['【阿爾卑斯草坡】', '【正向陪伴】', '【名字叫 Lukas】']
+            },
+            {
+              species: '貓',
+              title: '東京代官山低密度公寓的銀虎斑家貓',
+              location: '日本 · 東京澀谷區代官山',
+              desc: '自動恆溫飲水機、智能監測貓砂盆與防護完善的陽光露台，飼主為你設立了專屬醫療儲蓄帳戶。',
+              initStats: { autonomy: 54, suffering: 5, happiness: 86 },
+              initTags: ['【陽光露台】', '【智能健康監測】', '【名字叫 Sora】']
+            }
+          ]
+        }
+      };
+
+      /* -------------------------------------------------------------------------- */
+      /* 3. RICH LITERARY EVENT POOLS BY TIER & AGE STAGE                           */
+      /* -------------------------------------------------------------------------- */
+      const EVENT_POOLS = {
+        stray: [
+          {
+            id: 'stray_01',
+            minMonth: 0, maxMonth: 8,
+            title: '季風雨夜的失溫考驗',
+            narrative: '連日暴雨淹沒了巷弄的排水溝，混濁的泥水漫過你的腳踝。同胎最瘦小的手足已經停止了呼吸，母親用濕透的鼻尖推了推你，試圖帶你轉移到不遠處一間亮著霓虹燈的騎樓下，但那裡站著兩名手持掃帚的店鋪店員。',
+            choices: [
+              {
+                text: '冒險靠近騎樓角落取暖',
+                outcome: '店員發現了你們，揮舞竹掃帚喝斥驅趕。你的背部挨了一記悶棍，但趁亂叼走了一塊掉落的炸雞碎皮，勉強撐過了失溫的下半夜。',
+                deltas: { autonomy: -2, suffering: 14, happiness: 4 },
+                tag: '【挨過人類的棍棒】',
+                deathProb: 0.08,
+                deathCause: '在暴雨夜遭驅趕後失溫併發急性肺炎離世'
+              },
+              {
+                text: '蜷縮在廢棄紙箱堆深處硬撐',
+                outcome: '紙箱很快被雨水泡爛塌陷，你在劇烈的顫抖中靠著母親殘存的體溫熬到天亮，雖然躲過了毒打，但肺部留下了微弱的喘鳴聲。',
+                deltas: { autonomy: 3, suffering: 10, happiness: -6 },
+                tag: '【熬過暴雨寒夜】',
+                deathProb: 0.10,
+                deathCause: '幼年於暴雨夜嚴重失溫夭折'
+              }
+            ]
+          },
+          {
+            id: 'stray_02',
+            minMonth: 2, maxMonth: 18,
+            title: '塑膠袋裡的氣味與陌生人的手',
+            narrative: '午後的高溫讓柏油路面散發著焦油味。你已經兩天沒有進食，胃部因為吞下小石子與枯葉而隱隱抽痛。一名穿著夾腳拖的人類蹲在巷口，手裡捏著半塊散發肉香的麵包，朝你發出輕柔的嘖嘖聲。',
+            choices: [
+              {
+                text: '壓低耳朵，搖著尾巴上前乞食',
+                outcome: '那是一雙溫熱而粗糙的手。他沒有傷害你，不僅把麵包全給了你，還輕輕摸了摸你的頭頂。那是你這輩子第一次感受到不帶敵意的觸碰。',
+                deltas: { autonomy: -4, suffering: -12, happiness: 18 },
+                tag: '【曾感受到一次撫摸】',
+                deathProb: 0.02,
+                deathCause: '誤食路邊腐敗變質的食物引發急性腸胃穿孔'
+              },
+              {
+                text: '保持警戒，等對方離開再去撿拾',
+                outcome: '你躲在矮牆後直到人類遠去，才衝上前咬住麵包。然而另一隻體型高大的成年流浪犬突然竄出，咬傷了你的左耳並搶走了食物。',
+                deltas: { autonomy: 4, suffering: 15, happiness: -8 },
+                tag: '【左耳留下缺口】',
+                deathProb: 0.06,
+                deathCause: '爭奪食物時遭成年野狗咬穿頸部感染敗血症'
+              }
+            ]
+          },
+          {
+            id: 'stray_03',
+            minMonth: 4, maxMonth: 36,
+            title: '穿越六線道省道的黃昏',
+            narrative: '對街的傳統市場剛收攤，空氣中飄來內臟與魚骨的濃烈香氣。但橫亙在你眼前的是一條沒有紅綠燈的六線道公路，改裝卡車與機車像永不停歇的鐵流般呼嘯而過，路中央還留著上週同伴被輾平的暗色痕跡。',
+            choices: [
+              {
+                text: '趁車流短暫空檔，全力狂奔穿越',
+                outcome: '刺耳的喇叭聲與急煞車輪胎摩擦聲幾乎震碎你的耳膜。一輛機車擦過你的後腿，你跛著腳跌進對街的水溝，成功叼到了一大塊魚頭。',
+                deltas: { autonomy: 5, suffering: 12, happiness: 8 },
+                tag: '【與車輪擦身而過】',
+                deathProb: 0.22,
+                deathCause: '穿越高速車流時遭疾駛貨車撞擊（路殺）當場離世'
+              },
+              {
+                text: '放棄對街市場，在原地翻找乾癟垃圾桶',
+                outcome: '你在酸臭的塑膠袋裡只找到幾根沾滿螞蟻的雞骨頭。雖然飢餓感依舊灼燒著胃壁，但你保住了性命。',
+                deltas: { autonomy: 2, suffering: 8, happiness: -6 },
+                deathProb: 0.03,
+                deathCause: '誤吞尖銳雞骨刺穿食道引發內出血'
+              }
+            ]
+          },
+          {
+            id: 'stray_04',
+            minMonth: 6, maxMonth: 48,
+            title: '鐵網套索與動保志工的誘捕籠',
+            narrative: '清晨的霧氣尚未散去，幾名戴著手套的人類在街角放下了散發罐頭濃香的鐵籠。你聽見巷尾傳來同伴驚慌的哀鳴——那是捕犬隊或TNR絕育志工的車隊。鐵籠裡的肉泥香氣正誘惑著飢腸轆轆的你。',
+            choices: [
+              {
+                text: '走進誘捕籠吃掉罐頭',
+                outcome: '鐵門「哐啷」一聲落下。你在極度恐懼中經歷了麻醉與手術，醒來時耳朵多了一個平整的剪耳缺角，體內的寄生蟲也被順帶投藥清除，隨後被放回原處。',
+                deltas: { autonomy: -8, suffering: -6, happiness: 6 },
+                tag: '【剪耳絕育標記】',
+                deathProb: 0.04,
+                deathCause: '被捕入公立收容所後因空間超載與傳染病爆發而病逝'
+              },
+              {
+                text: '轉身鑽進狹窄的水泥涵洞躲藏',
+                outcome: '你在潮濕黑暗的涵洞裡屏住呼吸躲了整整一天，聽著外頭抓捕車遠去的引擎聲。你保住了完整的身體，但身上的壁蝨與跳蚤仍在啃噬你的皮膚。',
+                deltas: { autonomy: 6, suffering: 9, happiness: -4 },
+                tag: '【躲過一次抓捕】',
+                deathProb: 0.05,
+                deathCause: '因重度血液寄生蟲（焦蟲/艾利希體）引發溶血性貧血衰竭'
+              }
+            ]
+          },
+          {
+            id: 'stray_05',
+            minMonth: 9, maxMonth: 60,
+            title: '巷弄草叢裡的藍色粉末肉塊',
+            narrative: '社區裡最近有人抱怨夜晚的犬吠與翻找垃圾桶的聲音。今天清晨，你在常去的牆角發現了幾塊新鮮的生豬肉，但肉塊表面混著一層氣味古怪的藍綠色結晶粉末。',
+            choices: [
+              {
+                text: '強忍飢餓，嗅聞後轉身離開',
+                outcome: '你的野性直覺救了你一命。當天傍晚，同街區的兩隻流浪動物口吐白沫倒在水溝旁抽搐離世，整條巷子陷入死寂。',
+                deltas: { autonomy: 4, suffering: 10, happiness: -10 },
+                tag: '【識破毒餌倖存】',
+                deathProb: 0.02,
+                deathCause: '長期不敢進食人類區域食物，於乾季脫水衰竭'
+              },
+              {
+                text: '只舔食沒有沾到粉末的邊緣肉塊',
+                outcome: '微量的農藥依然順著唾液進入體內。你在廢棄工地裡劇烈嘔吐、肌肉痙攣了三天三夜，靠著狂喝雨水奇蹟般活了下來，但肝腎已嚴重受損。',
+                deltas: { autonomy: -5, suffering: 28, happiness: -16 },
+                tag: '【毒餌倖存後遺症】',
+                deathProb: 0.42,
+                deathCause: '誤食摻有劇毒農藥之誘餌，神經中毒抽搐離世'
+              }
+            ]
+          },
+          {
+            id: 'stray_06',
+            minMonth: 12, maxMonth: 72,
+            title: '冬日暖陽下的舊毛毯與收編契機',
+            narrative: '一位獨居的退休裁縫師在後門屋簷下鋪了一塊洗得發白的舊棉被，每天固定放上一碗乾淨的溫水與白飯拌魚肉。幾個月下來，她開始試著對你伸出手，門內透出溫暖的鵝黃色燈光。',
+            choices: [
+              {
+                text: '卸下心防，走進那扇半掩的木門',
+                outcome: '木門在你身後輕輕關上。你洗了這輩子第一次溫水澡，雖然一開始對四面水泥牆感到些許焦躁，但你終於不必再擔心今夜的暴雨與毒餌。',
+                deltas: { autonomy: -38, suffering: -24, happiness: 32 },
+                tag: '【從街頭被溫柔收編】',
+                transitionTo: 'working',
+                deathProb: 0.0
+              },
+              {
+                text: '吃完飯後退回街頭，守住自由的領地',
+                outcome: '你習慣了沒有屋頂的天空。每當夕陽西下，你依然會在屋簷下陪她靜靜坐上一小時，然後獨自沒入屬於你的城市夜色。',
+                deltas: { autonomy: 8, suffering: -4, happiness: 14 },
+                tag: '【在陽光下睡過午覺】',
+                deathProb: 0.08,
+                deathCause: '在寒流來襲的深夜裡，蜷縮於熟悉的屋簷下安詳凍斃'
+              }
+            ]
+          },
+          {
+            id: 'stray_08',
+            minMonth: 3, maxMonth: 40,
+            title: '建築工地的乾水泥袋與守夜人',
+            narrative: '城市邊緣的新建大樓工地夜裡總是亮著鹵素探照燈。你在成堆的乾水泥紙袋間找到一處避風的角落，守夜的老警衛正坐在折疊椅上喝著熱湯，收音機裡傳來沙沙作響的老歌。',
+            choices: [
+              {
+                text: '保持三步距離，安靜趴在光圈邊緣陪伴',
+                outcome: '老警衛注意到了安靜的你，把塑膠碗底剩下的肉湯倒在鐵罐蓋上推了過來。接下來幾個月，只要工地還沒完工，這裡就是你的半個避風港。',
+                deltas: { autonomy: -4, suffering: -10, happiness: 15 },
+                tag: '【工地探照燈下的微溫】',
+                deathProb: 0.02,
+                deathCause: '於工地熟睡時不慎遭夜間進場的砂石車視線死角輾過'
+              },
+              {
+                text: '趁警衛打瞌睡時溜進工寮偷咬便當盒',
+                outcome: '你不小心踢翻了鋁製水壺，驚醒的警衛抄起木棍追打。你雖然叼走了半塊排骨，卻在翻越鐵皮圍籬時被銳利的邊緣劃破了腹部皮膚。',
+                deltas: { autonomy: 5, suffering: 14, happiness: -5 },
+                tag: '【腹部鐵皮刮痕】',
+                deathProb: 0.06,
+                deathCause: '翻越工地鐵皮圍籬時傷口感染破傷風離世'
+              }
+            ]
+          },
+          {
+            id: 'stray_09',
+            minMonth: 12, maxMonth: 84,
+            title: '乾季的龜裂水窪與引擎蓋下的餘溫',
+            narrative: '連續數週沒有降雨，街區的水溝只剩下發黑發臭的底泥；到了深夜氣溫又驟降。一輛剛熄火的黑色轎車停在路邊，引擎室還散發著令人眷戀的溫熱氣息。',
+            choices: [
+              {
+                text: '鑽進車底與輪拱縫隙取暖過夜',
+                outcome: '你在溫暖的金屬零件旁沉沉睡去。隔天清晨引擎驟然發動的轟鳴嚇得你魂飛魄散，你在皮帶運轉前千鈞一髮地竄出車底，只被排氣管燙焦了一撮毛。',
+                deltas: { autonomy: 2, suffering: 8, happiness: 4 },
+                tag: '【引擎蓋下的驚險逃生】',
+                deathProb: 0.16,
+                deathCause: '躲在汽車引擎室取暖時，於清晨車輛發動瞬間遭風扇皮帶捲入重傷身亡'
+              },
+              {
+                text: '寧可忍受寒風，前往兩公里外的公園噴水池找水',
+                outcome: '你在凌晨空無一人的公園裡喝到了乾淨的積水，並在灌木叢深處挖洞度過寒夜，雖然四肢凍得僵硬，但避開了機械的致命陷阱。',
+                deltas: { autonomy: 6, suffering: 6, happiness: 2 },
+                tag: '【飲過凌晨公園的露水】',
+                deathProb: 0.03,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'stray_10',
+            minMonth: 24, maxMonth: 120,
+            title: '地盤更迭：年輕浪犬群的逼近',
+            narrative: '你在這條街區已經存活了數年，牙齒開始磨損，奔跑速度也不如從前。這天黃昏，三隻體格健壯的外來年輕流浪狗闖入巷口，對著你守候的垃圾子母車發出低沉威脅的咆哮。',
+            choices: [
+              {
+                text: '豎起背毛，拼死捍衛最後的覓食領地',
+                outcome: '一場慘烈的撕咬在暗巷展開。你憑著老練的經驗咬傷了領頭犬的鼻樑迫使牠們退卻，但自己的前肢也被咬穿，跛行了整整一個月。',
+                deltas: { autonomy: 8, suffering: 20, happiness: -6 },
+                tag: '【守住老街區的孤狼】',
+                deathProb: 0.20,
+                deathCause: '在捍衛地盤的撕咬中遭外來狗群圍攻，失血過多離世'
+              },
+              {
+                text: '垂下尾巴主動退讓，遷徙至更貧瘠的河堤外圍',
+                outcome: '你放棄了熟悉的街角與偶爾餵食的好心店家，退往雜草叢生的河濱荒地。食物變得更加匱乏，但你換來了不受侵擾的晚年平靜。',
+                deltas: { autonomy: 4, suffering: 10, happiness: -10 },
+                tag: '【退守河堤的晚年】',
+                deathProb: 0.08,
+                deathCause: '遷徙至荒涼河堤後因長期營養不良與衰老靜靜離世'
+              }
+            ]
+          },
+          {
+            id: 'stray_07',
+            minMonth: 18, maxMonth: 96,
+            title: '傳染病的陰影與發燒的夜晚',
+            narrative: '鼻端開始流出濃稠的分泌物，腳底肉墊逐漸硬化乾裂，體溫高得像一塊燒紅的炭。這是街頭伴侶動物最難逃過的病毒瘟疫（犬瘟熱／貓瘟），每一次呼吸都像在吞嚥碎玻璃。',
+            choices: [
+              {
+                text: '躲進沒有人跡的廢棄車底靜靜休養',
+                outcome: '在漫長而孤獨的七天裡，你全憑僅存的免疫力與雨水硬撐。高燒退去後，你的後肢留下了輕微的抽搐後遺症，但你活過了這場瘟疫。',
+                deltas: { autonomy: 2, suffering: 24, happiness: -14 },
+                tag: '【挺過致命瘟疫】',
+                deathProb: 0.45,
+                deathCause: '感染急性病毒性瘟疫（犬瘟／貓瘟），於廢棄車底孤獨病逝'
+              },
+              {
+                text: '拖著病體走到人類聚集的便利商店門口發出哀鳴',
+                outcome: '大多數路人掩鼻繞過滿身眼屎與鼻涕的你，直到深夜一名夜班店員用祇箱將你裝起送往公益獸醫院，施打了退燒與抗生素。',
+                deltas: { autonomy: -12, suffering: 6, happiness: 12 },
+                tag: '【曾獲陌生人醫療救援】',
+                deathProb: 0.25,
+                deathCause: '雖獲路人送醫，仍因病毒已侵犯中樞神經而於醫院離世'
+              }
+            ]
+          }
+        ],
+
+        working: [
+          {
+            id: 'work_01',
+            minMonth: 0, maxMonth: 14,
+            title: '新奇勁退去後的漫長白晝',
+            narrative: '剛到家時，全家人圍著你拍照、買了兩三個發聲玩具。然而半年過去，新鮮感逐漸被工作與帳單消磨，白天屋裡空無一人長達十小時，只有冷氣外機的低鳴與窗外移動的光影陪伴你。',
+            choices: [
+              {
+                text: '抓咬沙發與拖鞋發洩精力',
+                outcome: '飼主下班看見滿地碎屑後勃然大怒，將你關進狹小的陽台鐵籠懲罰了一整週。你學會了不再亂咬東西，也學會了壓抑天性。',
+                deltas: { autonomy: -12, suffering: 16, happiness: -14 },
+                tag: '【陽台關籠懲罰】',
+                deathProb: 0.01,
+                deathCause: '誤吞咬碎的塑膠巧拼引發急性腸阻塞離世'
+              },
+              {
+                text: '安靜趴在玄關墊子上等待開門聲',
+                outcome: '當鑰匙轉動門鎖的聲音響起，疲憊的飼主蹲下身把臉埋進你的毛髮裡嘆了口氣。你成了他面對城市壓力時唯一的無聲慰藉。',
+                deltas: { autonomy: -4, suffering: 4, happiness: 14 },
+                tag: '【玄關的漫長守候】',
+                deathProb: 0.0,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'work_02',
+            minMonth: 6, maxMonth: 48,
+            title: '廉價大賣場乾糧與結石的隱憂',
+            narrative: '為了節省開支，飼主總是購買十公斤裝、顏色鮮豔且澱粉與鹽分極高的廉價飼料，水碗裡的水也常常兩三天才換一次。最近你排尿時開始感到一陣陣灼熱刺痛。',
+            choices: [
+              {
+                text: '在飼主面前頻繁蹲姿並發出低鳴求救',
+                outcome: '飼主起初以為你只是鬧脾氣，直到看見血尿才驚覺不對，咬牙刷卡帶你去診所導尿並換成了處方飼料。',
+                deltas: { autonomy: -2, suffering: 8, happiness: 6 },
+                tag: '【經歷泌尿道結石】',
+                deathProb: 0.04,
+                deathCause: '因急性尿毒症延誤就醫引發腎衰竭離世'
+              },
+              {
+                text: '強忍疼痛躲在角落減少活動',
+                outcome: '你遵循動物隱藏病痛的本能縮在床底。病情拖了數日，膀胱脹痛難忍，雖然最後被發現送醫保住性命，但腎功能已折損大半。',
+                deltas: { autonomy: 0, suffering: 22, happiness: -14 },
+                tag: '【慢性腎病隱患】',
+                deathProb: 0.14,
+                deathCause: '隱忍泌尿道阻塞導致急性腎衰竭與膀胱破裂離世'
+              }
+            ]
+          },
+          {
+            id: 'work_03',
+            minMonth: 18, maxMonth: 84,
+            title: '紙箱封膠帶的聲音：搬家與人生變故',
+            narrative: '屋裡堆滿了棕色紙箱，空氣中瀰漫著封箱膠帶刺耳的撕拉聲。女主人懷孕了，長輩在客廳大聲爭執著「養寵物有弓漿蟲與過敏原，對嬰兒不好」。你站在紙箱縫隙中，不知所措地看著他們。',
+            choices: [
+              {
+                text: '乖巧貼在飼主腳邊，用頭輕蹭他的手背',
+                outcome: '男主人看著你清澈的眼睛沉默許久，最終頂住長輩壓力，堅持把你一起帶去新租的公寓，只是你的活動空間被限制在客廳與陽台。',
+                deltas: { autonomy: -8, suffering: 6, happiness: 8 },
+                tag: '【陪伴家庭度過變遷】',
+                deathProb: 0.0,
+                deathCause: ''
+              },
+              {
+                text: '因環境變動焦慮而徹夜吠叫／抓門',
+                outcome: '連日的哭鬧成了壓垮耐心的最後一根稻草。一個陰雨的週末，車子開到了陌生的郊區山路，車門打開後再也沒有等你上車。',
+                deltas: { autonomy: 46, suffering: 32, happiness: -38 },
+                tag: '【曾被信任的人類棄養】',
+                transitionTo: 'stray',
+                deathProb: 0.08,
+                deathCause: '遭棄養後在車陣中狂奔追趕飼主車輛，不幸遭後車追撞身亡'
+              }
+            ]
+          },
+          {
+            id: 'work_04',
+            minMonth: 24, maxMonth: 120,
+            title: '颱風夜的鐵鍊與半掩的紗門',
+            narrative: '強颱登陸的夜晚，狂風吹得鐵皮屋頂隆隆作響。如果你是庭院犬，雨水正不斷灌進簡陋的塑膠狗屋；如果你是公寓家貓，強風吹開了未鎖緊的陽台紗門，外頭是陌生而寬廣的世界。',
+            choices: [
+              {
+                text: '留在原地，退守熟悉的安全角落',
+                outcome: '風雨整整肆虐了一夜。隔天清晨飼主出來查看，用乾毛巾替你擦乾身體，並加了一頓熱騰騰的鮮肉罐頭。',
+                deltas: { autonomy: -2, suffering: 4, happiness: 12 },
+                tag: '【風雨後的溫熱罐頭】',
+                deathProb: 0.02,
+                deathCause: '颱風夜遭吹落的鐵皮招牌砸中棲身處離世'
+              },
+              {
+                text: '掙脫束縛／跨出紗門，衝向未知的外界',
+                outcome: '你在狂風暴雨中迷失了方向，熟悉的氣味被雨水沖刷殆盡。從這一刻起，你失去了遮風避雨的屋簷，卻獲得了無邊無際的街頭自由。',
+                deltas: { autonomy: 45, suffering: 24, happiness: -25 },
+                tag: '【走失淪為街頭浪跡】',
+                transitionTo: 'stray',
+                deathProb: 0.12,
+                deathCause: '颱風夜走失後墜入暴漲的排水大圳溺斃'
+              }
+            ]
+          },
+          {
+            id: 'work_06',
+            minMonth: 12, maxMonth: 72,
+            title: '農曆春節的震耳鞭炮與寄宿鐵籠',
+            narrative: '年節將至，窗外整夜響起震耳欲聾的沖天炮與鞭炮爆炸聲，空氣中瀰漫著刺鼻的硝煙味。飼主一家準備返鄉度長假，將你送進了一間擁擠吵雜的平價寵物店寄宿，或獨自留在放滿乾糧的屋內。',
+            choices: [
+              {
+                text: '在極度驚恐中拼命抓撓房門與鐵籠',
+                outcome: '高分貝的炮竹聲讓你陷入恐慌，你的指甲在抓門時斷裂流血，連續三天滴水未進，直到飼主返家時你已瘦了一圈，眼神充滿分離焦慮。',
+                deltas: { autonomy: -6, suffering: 16, happiness: -12 },
+                tag: '【懼怕節慶的鞭炮聲】',
+                deathProb: 0.03,
+                deathCause: '因節慶連日高分貝鞭炮驚嚇，誘發急性心肌梗塞休克離世'
+              },
+              {
+                text: '鑽進衣櫥最深處或沾有飼主氣味的舊衣服裡閉眼',
+                outcome: '你把鼻子埋進熟悉的舊毛衣氣味中，用微弱的安全感抵禦外頭彷彿世界末日般的巨響，平安熬過了這段漫長的獨處時光。',
+                deltas: { autonomy: 2, suffering: 6, happiness: 2 },
+                tag: '【舊毛衣裡的氣味慰藉】',
+                deathProb: 0.0,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'work_07',
+            minMonth: 24, maxMonth: 96,
+            title: '未結紮的本能躁動與意外的生命',
+            narrative: '飼主因為覺得「結紮太花錢」或「剝奪天性很殘忍」，遲遲沒有帶你去動手術。春末的夜晚，賀爾蒙的躁動讓你坐立難安，窗外傳來同類呼喚的叫聲，而你的生殖系統也開始出現發炎腫脹的徵兆。',
+            choices: [
+              {
+                text: '整夜焦躁嚎叫，促使飼主帶你去醫院檢查',
+                outcome: '獸醫嚴肅警告了未絕育導致蓄膿與腫瘤的高風險，飼主終於簽下手術同意書。經歷一週戴頭套的不便後，你徹底擺脫了賀爾蒙與生殖病變的折磨。',
+                deltas: { autonomy: -6, suffering: -8, happiness: 10 },
+                tag: '【中年完成絕育手術】',
+                deathProb: 0.01,
+                deathCause: ''
+              },
+              {
+                text: '默默忍受體內發炎與躁動，趴在冰涼磁磚上降溫',
+                outcome: '高燒與發炎反覆發作，直到腹部腫脹流膿才被緊急送醫急救。雖然撿回一命，但住院的高昂開銷讓飼主對你頗有微詞。',
+                deltas: { autonomy: 0, suffering: 20, happiness: -10 },
+                tag: '【熬過急診大手術】',
+                deathProb: 0.15,
+                deathCause: '因未絕育引發重度子宮蓄膿／攝護腺病變併發腹膜炎離世'
+              }
+            ]
+          },
+          {
+            id: 'work_08',
+            minMonth: 48, maxMonth: 144,
+            title: '停電的酷暑午後與西曬鐵皮屋',
+            narrative: '八月的正午，戶外氣溫飆破三十八度。區域電網跳電讓家裡的電風扇瞬間停擺，頂樓加蓋或庭院鐵皮屋內的溫度在半小時內急遽攀升，連水碗裡的水都變得溫熱。',
+            choices: [
+              {
+                text: '退入浴室磁磚地板，將肚皮貼在排水孔旁',
+                outcome: '浴室陰涼的磁磚與殘留的水氣替你爭取了寶貴的降溫時間，撐到了傍晚電力恢復與飼主返家。',
+                deltas: { autonomy: 4, suffering: 6, happiness: 4 },
+                tag: '【酷暑停電的求生智慧】',
+                deathProb: 0.02,
+                deathCause: ''
+              },
+              {
+                text: '在悶熱的客廳／庭院焦急來回踱步喘氣',
+                outcome: '急促的喘息反而加速了體溫飆升。當飼主下班開門時，你已經熱衰竭倒在地板上，緊急沖冷水送醫後才從鬼門關前拉了回來。',
+                deltas: { autonomy: -2, suffering: 22, happiness: -12 },
+                tag: '【曾歷經重度熱衰竭】',
+                deathProb: 0.18,
+                deathCause: '於夏日午後室內高溫悶熱且通風不良環境下，引發急性熱衰竭（中暑）離世'
+              }
+            ]
+          },
+          {
+            id: 'work_05',
+            minMonth: 84, maxMonth: 200,
+            title: '白內障的霧氣與高昂的手術報價單',
+            narrative: '歲月在你的口鼻染上一層灰白，晶狀體逐漸混濁如毛玻璃，後腿關節在陰雨天總是隱隱作痛。獸醫指著 X 光片與腫瘤檢驗報告，報出了一個相當於飼主兩個月薪水的醫療數字。',
+            choices: [
+              {
+                text: '安靜舔舐飼主顫抖的手掌',
+                outcome: '飼主紅著眼眶選擇了保守的止痛與居家安寧照護。雖然沒有進行昂貴的開刀，但他每天下班都推掉應酬，抱著行動不便的你曬太陽。',
+                deltas: { autonomy: -8, suffering: 12, happiness: 16 },
+                tag: '【居家安寧的陪伴】',
+                deathProb: 0.35,
+                deathCause: '在熟悉的家人在旁輕聲呼喚下，因年老器官衰竭安詳辭世'
+              },
+              {
+                text: '拒絕進食，獨自縮進陰暗角落等待終點',
+                outcome: '身體的機能正迅速熄滅。你不願再讓插管與針頭延續痛苦，在一個安靜的凌晨，聽著客廳時鐘的滴答聲緩緩停止了呼吸。',
+                deltas: { autonomy: 4, suffering: 14, happiness: 4 },
+                tag: '【不願成為負擔的告別】',
+                deathProb: 0.65,
+                deathCause: '高齡多重器官衰竭，於睡夢中靜靜走完一生'
+              }
+            ]
+          }
+        ],
+
+        mill: [
+          {
+            id: 'mill_01',
+            minMonth: 0, maxMonth: 24,
+            title: '鐵絲網上的腳掌與第一針催情劑',
+            narrative: '你的世界長寬各六十公分。腳底下是沒有鋪墊的粗鐵絲網，排泄物直接落入下層托盤，阿摩尼亞的刺鼻氣味讓你的眼角終年流著紅褐色的淚痕。當你第一次發情，粗糙的手掌抓起你的後頸，將針筒刺入皮下。',
+            choices: [
+              {
+                text: '劇烈掙扎並試圖反咬那隻手',
+                outcome: '換來的是一頓塑膠水管抽打與兩天斷食。你的犬齒在啃咬鐵籠時崩斷了一角，劇痛讓你在角落蜷縮發抖。',
+                deltas: { autonomy: 2, suffering: 22, happiness: -8 },
+                tag: '【崩斷的犬齒】',
+                deathProb: 0.10,
+                deathCause: '因激烈反抗遭繁殖場人員重擊頭部致死'
+              },
+              {
+                text: '麻木地閉上雙眼，任由擺佈',
+                outcome: '你學會了把靈魂抽離軀殼。此後的數十個月裡，懷孕、漲奶、幼崽在滿月前被強行抱走成了無止境的循環。',
+                deltas: { autonomy: -3, suffering: 16, happiness: -6 },
+                tag: '【被奪走的無數幼崽】',
+                deathProb: 0.06,
+                deathCause: '密集懷孕導致嚴重子宮蓄膿與敗血症死於籠內'
+              }
+            ]
+          },
+          {
+            id: 'mill_02',
+            minMonth: 6, maxMonth: 48,
+            title: '無執照的地下剖腹與鈣質流失',
+            narrative: '為了縮短繁殖週期並確保高價品種幼崽存活，場主在未施打足夠止痛藥的情況下，於簡陋的木桌上為你進行第 N 次剖腹或助產。你的骨骼因為長期缺乏日照與營養而變得脆弱如枯枝。',
+            choices: [
+              {
+                text: '在手術檯上用盡力氣舔舐剛出生的幼崽',
+                outcome: '即便腹部的縫線火辣辣地疼，母性本能仍讓你將最後一絲溫暖留給孩子——儘管你知道三十天後牠們就會被裝進紙箱貼上標價。',
+                deltas: { autonomy: 0, suffering: 18, happiness: 6 },
+                tag: '【鐵籠裡的短暫母愛】',
+                deathProb: 0.22,
+                deathCause: '於地下繁殖場簡陋剖腹產過程中大出血休克死亡'
+              },
+              {
+                text: '眼神空洞地望著鐵皮屋頂的蜘蛛網',
+                outcome: '傷口感染發炎了半個月才勉強結痂。你的肚皮上交錯著如蜈蚣般的疤痕，後腿因為嚴重缺鈣開始出現抖動。',
+                deltas: { autonomy: -2, suffering: 24, happiness: -10 },
+                tag: '【滿腹交錯的手術疤痕】',
+                deathProb: 0.26,
+                deathCause: '產後重度低血鈣症（產褥熱）無人救治，痙攣衰竭而亡'
+              }
+            ]
+          },
+          {
+            id: 'mill_03',
+            minMonth: 12, maxMonth: 60,
+            title: '先天遺傳病的枷鎖：每一次呼吸都是折磨',
+            narrative: '人類為了培育出符合審美標準的「扁臉、摺耳、極短腿」，將致病基因牢牢鎖進你的血液裡。夏夜裡倉庫通風扇故障，悶熱的空氣讓你張大嘴巴喘息，舌頭因缺氧而呈現紫藍色。',
+            choices: [
+              {
+                text: '把鼻尖貼在冰冷的鐵門縫隙求生',
+                outcome: '鐵門外滲入的一絲微弱涼風救了你，但同排籠子裡已有三隻同伴在今夜徹底安靜下來，隔天一早被裝進黑色垃圾袋。',
+                deltas: { autonomy: 1, suffering: 16, happiness: -6 },
+                tag: '【目睹同籠同伴離去】',
+                deathProb: 0.24,
+                deathCause: '因品種遺傳性呼吸道狹窄，於悶熱夏夜熱衰竭窒息死亡'
+              },
+              {
+                text: '拍打水碗試圖弄濕身體降溫',
+                outcome: '打翻的水浸濕了毛髮，稍微緩解了高熱，卻也讓原本就患有黴菌與疥癬的皮膚潰爛得更加嚴重。',
+                deltas: { autonomy: 2, suffering: 14, happiness: -4 },
+                tag: '【全身嚴重皮膚潰爛】',
+                deathProb: 0.18,
+                deathCause: '重度中暑併發急性心肺衰竭死於鐵籠'
+              }
+            ]
+          },
+          {
+            id: 'mill_05',
+            minMonth: 2, maxMonth: 36,
+            title: '農曆年前的批發裝箱與長途貨車',
+            narrative: '為了趕在節慶送禮旺季前出貨，繁殖場連夜將數十個塑膠透氣籠疊進密閉廂型車。你在劇烈晃動與引擎廢氣中與其他幼崽擠作一團，沒有水，只有彼此驚恐的喘息與嘔吐物。',
+            choices: [
+              {
+                text: '緊緊貼著箱壁換氣孔，大口呼吸僅存的冷空氣',
+                outcome: '長達八小時的黑夜運輸結束後，同箱有兩隻體弱同伴已經僵硬。你因為搶到了換氣孔的位置而倖存，被轉賣至另一處地下配種場。',
+                deltas: { autonomy: 1, suffering: 18, happiness: -8 },
+                tag: '【熬過密閉貨車運輸】',
+                deathProb: 0.16,
+                deathCause: '於高密度長途密閉運輸過程中因缺氧與緊迫症休克死亡'
+              },
+              {
+                text: '把虛弱發抖的同胎手足護在身下',
+                outcome: '你用體溫護住了同伴，自己卻因長時間缺水與擠壓導致後肢神經受損，抵達目的地時連站立都搖搖晃晃。',
+                deltas: { autonomy: 0, suffering: 22, happiness: 4 },
+                tag: '【黑暗車廂裡的相濡以沫】',
+                deathProb: 0.20,
+                deathCause: '於非法批發運輸途中因嚴重脫水與低血糖衰竭死於籠內'
+              }
+            ]
+          },
+          {
+            id: 'mill_06',
+            minMonth: 12, maxMonth: 60,
+            title: '鏽蝕鐵絲與永不停止的轉圈刻板行為',
+            narrative: '長年囚禁在連轉身都困難的方寸鐵籠裡，極度的感官剝奪讓你的精神瀕臨瓦解。你開始每天重複上千次相同的動作：不停轉圈、啃咬鐵欄杆，或者把自己的尾巴咬到血肉模糊。',
+            choices: [
+              {
+                text: '透過啃咬自己的腳掌與尾巴來轉移焦慮',
+                outcome: '痛覺成了唯一能證明自己還活著的訊號。場主發現後只是粗暴地替你噴上刺鼻的紫藥水，並用塑膠束帶限制你的活動。',
+                deltas: { autonomy: -4, suffering: 20, happiness: -10 },
+                tag: '【重度刻板自殘行為】',
+                deathProb: 0.12,
+                deathCause: '因嚴重精神刻板自殘導致傷口潰爛引發全身性敗血症亡'
+              },
+              {
+                text: '盯著鐵皮牆縫透進來的那一束灰塵光柱發呆',
+                outcome: '每天下午兩點到兩點十五分，會有一道細微的陽光穿過排風扇葉片落在你的鼻尖上。那十五分鐘成了你支撐下去的全部意義。',
+                deltas: { autonomy: 2, suffering: 8, happiness: 6 },
+                tag: '【鐵皮縫隙裡的十五分鐘陽光】',
+                deathProb: 0.05,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'mill_07',
+            minMonth: 18, maxMonth: 72,
+            title: '高壓水柱沖洗日的刺骨寒意',
+            narrative: '每逢寒流來襲的冬日，場主依然直接拿起冰冷的高壓水柱朝整排鐵籠噴射，沖刷底盤堆積如山的排泄物。無處可躲的你全身濕透，在沒有烘乾設備的陰暗倉庫裡冷得牙關打顫。',
+            choices: [
+              {
+                text: '隔著鐵網與隔壁籠子的同伴緊緊貼靠在一起',
+                outcome: '兩具濕冷瘦弱的軀體隔著冰冷的鐵絲網互相傳遞微弱的體溫。你們誰也沒有發出聲音，就這樣靠著彼此撐過了漫長的冬夜。',
+                deltas: { autonomy: 1, suffering: 14, happiness: 8 },
+                tag: '【隔著鐵網的體溫】',
+                deathProb: 0.14,
+                deathCause: '於冬日遭冷水沖洗鐵籠後失溫，併發急性肺水腫離世'
+              },
+              {
+                text: '拼命甩乾毛髮並原地跳動產熱',
+                outcome: '腳掌在濕滑的鐵絲網上被割出數道血痕，但劇烈的活動讓你的核心體溫沒有跌破底線，只是從此留下了慢性支氣管炎的咳嗽聲。',
+                deltas: { autonomy: 2, suffering: 18, happiness: -6 },
+                tag: '【慢性支氣管喘鳴】',
+                deathProb: 0.15,
+                deathCause: '冬季高壓冷水沖籠導致重度肺炎與心臟衰竭死於籠中'
+              }
+            ]
+          },
+          {
+            id: 'mill_04',
+            minMonth: 24, maxMonth: 84,
+            title: '失去繁殖價值後的十字路口：手電筒的強光',
+            narrative: '你的受孕率已經大幅下降，牙齒脫落、乳腺長出硬塊。這天深夜，鐵皮屋大門突然被破開，刺眼的手電筒強光與相機快門聲四起——是動保稽查人員與救援志工突襲了這座非法工廠；又或者，是場主在查緝前夕準備將老病種犬貓載往深山棄置。',
+            choices: [
+              {
+                text: '向著手電筒的光亮發出沙啞的氣音',
+                outcome: '一名志工隔著毛巾小心翼翼地將你從鏽蝕的鐵籠裡抱出來。當你的腳掌生平第一次踏上柔軟的草地時，你因為不知道該如何行走而呆立在原地。幾個月的醫療後，你被一個願意接納老病動物的家庭領養。',
+                deltas: { autonomy: 38, suffering: -35, happiness: 42 },
+                tag: '【熬過煉獄重見天日】',
+                transitionTo: 'working',
+                deathProb: 0.05,
+                deathCause: '獲救後雖受盡溫柔照料，仍因長年繁殖場摧殘導致腫瘤轉移離世'
+              },
+              {
+                text: '極度恐懼人類，縮在鐵籠最深處發抖',
+                outcome: '你在被連夜轉移棄置的過程中被丟在偏遠山區產業道路的紙箱裡。沒有任何野外求生能力的你，茫然地看著陌生的樹林與滂沱大雨。',
+                deltas: { autonomy: 50, suffering: 26, happiness: -18 },
+                tag: '【失去利用價值遭棄置深山】',
+                transitionTo: 'stray',
+                deathProb: 0.52,
+                deathCause: '失去繁殖價值後遭場主棄置深山，因毫無求生能力且滿身病痛而餓死於荒野'
+              }
+            ]
+          }
+        ],
+
+        elite: [
+          {
+            id: 'elite_01',
+            minMonth: 0, maxMonth: 24,
+            title: '正向幼犬／幼貓社會化課程與落地窗陽光',
+            narrative: '午後的陽光穿過雙層隔音落地窗，灑在恆溫二十四度的橡木地板上。你的碗裡是精算過鈣磷比的鹿肉與鮭魚泥，行為訓練師正拿著天然風乾肉乾，溫柔地引導你認識吸塵器與門鈴的聲音。',
+            choices: [
+              {
+                text: '好奇地用鼻尖輕觸每一個新玩具',
+                outcome: '全家人為你的勇敢鼓掌歡呼。你獲得了新的藏食益智玩具，並在柔軟的羊毛毯上睡了一個無憂無慮的午覺。',
+                deltas: { autonomy: 6, suffering: -3, happiness: 10 },
+                tag: '【無憂無慮的幼年】',
+                deathProb: 0.0,
+                deathCause: ''
+              },
+              {
+                text: '慵懶地翻過肚皮，要求人類替你抓肚皮',
+                outcome: '訓練師笑著停下課程，全家人輪流撫摸你柔順發亮的毛髮。在你的認知裡，人類的雙手永遠只代表溫暖與食物。',
+                deltas: { autonomy: 4, suffering: -4, happiness: 12 },
+                tag: '【從未見過人類的惡意】',
+                deathProb: 0.0,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'elite_02',
+            minMonth: 18, maxMonth: 96,
+            title: '森林國家公園的週末與短暫迷途',
+            narrative: '週末家庭旅遊，你搭著休旅車後座的專屬安全睡窩來到郊區森林步道。松針與泥土的氣息讓你興奮不已，你在追逐一隻松鼠時跑出了視線範圍，樹林間突然起了薄霧。',
+            choices: [
+              {
+                text: '停在原地，等待項圈上的 GPS 定位器發揮作用',
+                outcome: '不到二十分鐘，飼主便循著手機定位氣喘吁吁地找來，緊緊抱住你並餵了你整包有機肉泥。',
+                deltas: { autonomy: 4, suffering: 2, happiness: 8 },
+                tag: '【配戴智能定位項圈】',
+                deathProb: 0.0,
+                deathCause: ''
+              },
+              {
+                text: '順著來時的氣味自己往回跑',
+                outcome: '你在林間小徑奔跑時不小心被枯樹枝劃傷了肉墊。回到車上後，飼主立刻用隨車醫藥箱消毒包紮，並預約了隔天的私人獸醫門診。',
+                deltas: { autonomy: 8, suffering: 4, happiness: 6 },
+                tag: '【漫步紅木森林步道】',
+                deathProb: 0.01,
+                deathCause: '於森林探險時遭毒蛇咬傷，雖緊急送醫仍不幸休克離世'
+              }
+            ]
+          },
+          {
+            id: 'elite_03',
+            minMonth: 60, maxMonth: 150,
+            title: '年度高階健檢與早期腫瘤切除',
+            narrative: '邁入中年後，每半年的全套血液生化、心臟超音波與胸腹腔 X 光成了固定行程。獸醫在超音波影像上發現脾臟有一顆不到一公分的初期結節，寵物醫療保險隨即啟動全額理賠。',
+            choices: [
+              {
+                text: '在氣體麻醉與恆溫手術檯上接受微創切除',
+                outcome: '手術極為成功。你在獨立的無菌恢復室裡醒來，飼主特地請了一週居家辦公假，日夜守在軟墊旁替你換藥與餵食流質營養膏。',
+                deltas: { autonomy: -4, suffering: 8, happiness: 10 },
+                tag: '【享有頂級專科醫療】',
+                deathProb: 0.02,
+                deathCause: '於高齡手術麻醉過程中發生罕見心律不整安詳離世'
+              },
+              {
+                text: '術後戴著軟布伊莉莎白圈向家人撒嬌',
+                outcome: '你成了家裡的頭號保護對象，連散步都有專屬寵物推車代步，成功跨越了原本可能致命的疾病關卡。',
+                deltas: { autonomy: -2, suffering: 6, happiness: 12 },
+                tag: '【專屬高齡推車代步】',
+                deathProb: 0.01,
+                deathCause: '術後併發血栓，在家人陪伴下於專科動物醫院離世'
+              }
+            ]
+          },
+          {
+            id: 'elite_05',
+            minMonth: 6, maxMonth: 72,
+            title: '私人寵物友善客艙與異國渡假周',
+            narrative: '這一年夏天，飼主一家決定前往湖區渡假。你沒有被關進陰暗的貨艙或寄宿籠，而是通過了全套健康檢疫，坐在鋪著吸水軟墊的專屬座位旁，透過機窗或景觀火車看著雲層與草坡掠過。',
+            choices: [
+              {
+                text: '安穩地趴在飼主腳邊，享受旅途的平靜',
+                outcome: '抵達湖畔木屋後，你在清澈的淺水區追逐水花，傍晚則在露台享用現烤無鹽鮭魚排。',
+                deltas: { autonomy: 8, suffering: -4, happiness: 12 },
+                tag: '【湖畔木屋的夏日記憶】',
+                deathProb: 0.0,
+                deathCause: ''
+              },
+              {
+                text: '對著窗外飛鳥與新奇風景興奮地輕聲嗚鳴',
+                outcome: '鄰座的旅客微笑著誇獎你既乾淨又有教養。在這個階層裡，你的每一次好奇都會被世界溫柔以待。',
+                deltas: { autonomy: 6, suffering: -2, happiness: 10 },
+                tag: '【被世界溫柔以待】',
+                deathProb: 0.0,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'elite_06',
+            minMonth: 36, maxMonth: 132,
+            title: '定制鮮食營養師與動物齒科護理',
+            narrative: '步入壯年後，你的餐譜由專業獸醫營養師每季調整，精準添加奧米加三魚油與綠唇貽貝關節粉。每晚睡前，飼主都會用酵素牙膏替你仔細刷牙，確保沒有任何牙周病菌影響你的心腎健康。',
+            choices: [
+              {
+                text: '乖乖張開嘴巴配合刷牙，等待課後凍乾獎勵',
+                outcome: '直到十歲高齡，你的牙齒依然潔白堅固，連獸醫都驚嘆你的口腔與內臟年齡比同齡動物年輕了整整四歲。',
+                deltas: { autonomy: -2, suffering: -5, happiness: 8 },
+                tag: '【十歲仍擁有健康潔白牙齒】',
+                deathProb: 0.0,
+                deathCause: ''
+              },
+              {
+                text: '把頭扭開玩捉迷藏，跟飼主在波斯地毯上打滾',
+                outcome: '刷牙時間變成了每晚十分鐘的親密摔角遊戲。笑聲迴盪在溫暖的客廳裡，你從未體會過什麼叫做飢餓或恐懼。',
+                deltas: { autonomy: 4, suffering: -4, happiness: 11 },
+                tag: '【地毯上的每晚嬉戲】',
+                deathProb: 0.0,
+                deathCause: ''
+              }
+            ]
+          },
+          {
+            id: 'elite_07',
+            minMonth: 96, maxMonth: 180,
+            title: '高齡水療復健中心與無障礙居家改造',
+            narrative: '十一歲那年，你的後肢關節開始出現退化性關節炎。飼主立刻將家裡所有木地板鋪滿防滑羊毛地墊、在沙發旁增設緩坡階梯，並每週兩次帶你前往動物復健中心進行恆溫水療跑步機訓練。',
+            choices: [
+              {
+                text: '在溫水浮力支撐下努力邁開步伐復健',
+                outcome: '溫熱的水流舒緩了關節的僵硬，物理治療師一邊按摩你的後背一邊餵食肉泥，讓你在高齡歲月裡依然保有自主行走的尊嚴。',
+                deltas: { autonomy: 6, suffering: -8, happiness: 10 },
+                tag: '【享有高齡恆溫水療復健】',
+                deathProb: 0.02,
+                deathCause: '於高齡睡眠中突發無痛性心臟停搏，在恆溫睡窩裡安詳離世'
+              },
+              {
+                text: '復健後在紅外線理療燈下舒服地打呼嚕睡著',
+                outcome: '溫暖的紅外線穿透肌肉，你夢見自己還是那隻在草坪上飛奔的幼崽，醒來時飼主正溫柔地替你蓋上小毛毯。',
+                deltas: { autonomy: 2, suffering: -10, happiness: 12 },
+                tag: '【紅外線暖燈下的午睡】',
+                deathProb: 0.02,
+                deathCause: '於溫暖理療後在家人懷抱中安詳辭世'
+              }
+            ]
+          },
+          {
+            id: 'elite_04',
+            minMonth: 144, maxMonth: 220,
+            title: '壁爐前的最後一個冬天與到府善終',
+            narrative: '你已經相當於人類的九十歲高齡。聽力與視力幾乎退化，但嗅覺依然認得每一位家人的氣味。當慢性器官衰竭讓進食變得困難、止痛針也難以維持生活品質時，家人請來了熟識的家庭獸醫到府。',
+            choices: [
+              {
+                text: '把下巴輕輕靠在飼主溫暖的掌心裡閉上眼',
+                outcome: '落地窗外飄著細雪，壁爐裡的柴火發出輕微的噼啪聲。沒有冰冷的不鏽鋼診療台，也沒有恐懼，你在全家人輕柔的道謝與親吻中，像睡著一樣沉入無夢的長眠。',
+                deltas: { autonomy: 0, suffering: -20, happiness: 15 },
+                tag: '【在愛與尊嚴中善終】',
+                deathProb: 1.0,
+                deathCause: '高齡壽終正寢，於家中柔軟地毯與家人懷抱裡接受溫柔安樂善終'
+              },
+              {
+                text: '最後一次抬起頭，努力舔去飼主臉頰上的眼淚',
+                outcome: '你用盡最後一絲力氣傳達了十多年來的陪伴與感謝。在鎮靜劑緩緩生效的幾秒鐘裡，你彷彿又回到了幼年時那片陽光燦爛的草坪。',
+                deltas: { autonomy: 2, suffering: -18, happiness: 18 },
+                tag: '【走過完整而幸福的一生】',
+                deathProb: 1.0,
+                deathCause: '高齡自然衰竭，在全家人徹夜守候與輕撫下安詳離世'
+              }
+            ]
+          }
+        ]
+      };
+
+      /* -------------------------------------------------------------------------- */
+      /* 4. PEER SIMULATION DATA (3 SAME-SECOND COMPANIONS)                         */
+      /* -------------------------------------------------------------------------- */
+      const PEER_TEMPLATES = [
+        {
+          tier: 'stray',
+          tierName: '發展中流浪 (45%)',
+          species: '貓',
+          name: '孟買貧民窟的虎斑幼貓',
+          location: '印度 · 孟買',
+          milestones: [
+            { month: 2, text: '在季風雨季的排水涵管裡學會抓捕蟑螂維生', alive: true },
+            { month: 4, text: '因未接種疫苗感染急性貓瘟，於廢棄紙箱中病逝', alive: false, cause: '第 4 個月因貓瘟病逝' },
+            { month: 9, text: '躲過街頭野狗圍攻，但左後腿留下永久跛行', alive: true },
+            { month: 18, text: '在穿越鐵道覓食時不幸遭列車撞擊身亡', alive: false, cause: '第 1 歲 6 個月遭列車撞擊身亡' }
+          ]
+        },
+        {
+          tier: 'stray',
+          tierName: '發展中流浪 (45%)',
+          species: '犬',
+          name: '雅加達河畔的瘦弱米克斯',
+          location: '印尼 · 雅加達',
+          milestones: [
+            { month: 3, text: '在傳統市場後巷翻找廚餘時被攤販潑灑熱水驅趕', alive: true },
+            { month: 6, text: '感染嚴重疥癬與焦蟲症，毛髮幾乎掉光', alive: true },
+            { month: 12, text: '誤食街區投放的滅鼠毒餌，於河堤邊抽搐離世', alive: false, cause: '第 1 歲誤食毒餌離世' }
+          ]
+        },
+        {
+          tier: 'stray',
+          tierName: '發展中流浪 (45%)',
+          species: '犬',
+          name: '利馬山城貧民區的黃狗',
+          location: '秘魯 · 利馬',
+          milestones: [
+            { month: 4, text: '靠著替當地小販看守攤位換取每日一頓玉米餅碎屑', alive: true },
+            { month: 12, text: '由國際動保巡迴醫療車完成免費絕育與狂犬病疫苗注射', alive: true },
+            { month: 36, text: '在街頭自由生活三年後，於寒冬夜晚因心絲蟲末期衰竭離世', alive: false, cause: '第 3 歲因心絲蟲衰竭離世' }
+          ]
+        },
+        {
+          tier: 'working',
+          tierName: '工薪家庭 (35%)',
+          species: '犬',
+          name: '台南老透天的看門黑狗「來福」',
+          location: '台灣 · 台南',
+          milestones: [
+            { month: 4, text: '被套上紅項圈與鐵鍊，開始負責看守鄉間三合院大門', alive: true },
+            { month: 18, text: '長年吃人類剩菜導致毛色黯淡，但每天傍晚能去田埂散步十分鐘', alive: true },
+            { month: 60, text: '飼主阿公住院後被親戚解開鐵鍊放生，淪為魚塭區流浪犬', alive: true },
+            { month: 84, text: '在魚塭旁因慢性腎衰竭與心絲蟲病逝', alive: false, cause: '第 7 歲於魚塭旁病逝' }
+          ]
+        },
+        {
+          tier: 'working',
+          tierName: '工薪家庭 (35%)',
+          species: '貓',
+          name: '首爾半地下室套房的白貓',
+          location: '南韓 · 首爾',
+          milestones: [
+            { month: 6, text: '陪伴獨居準備考試的年輕飼主度過無數個熬夜的凌晨', alive: true },
+            { month: 24, text: '完成絕育手術，每天在唯一一扇高窗前曬二十分鐘太陽', alive: true },
+            { month: 96, text: '隨飼主搬入寬敞公寓，開始食用高齡處方保健罐頭', alive: true },
+            { month: 156, text: '於 13 歲高齡因慢性腎衰竭在飼主懷中安詳離世', alive: false, cause: '第 13 歲因腎衰竭善終' }
+          ]
+        },
+        {
+          tier: 'mill',
+          tierName: '非法繁殖場 (12%)',
+          species: '貓',
+          name: '地下繁殖籠的摺耳種母 #14',
+          location: '東亞 · 非法繁殖場',
+          milestones: [
+            { month: 6, text: '骨骼遺傳病發作，四肢關節腫大僵硬，仍被關在鐵絲籠中', alive: true },
+            { month: 12, text: '第一次被迫交配產下四隻幼崽，幼崽於滿月當天全數被抱走販售', alive: true },
+            { month: 36, text: '因連續繁殖五胎導致嚴重鈣質流失與脊椎變形癱瘓', alive: true },
+            { month: 48, text: '失去生育能力後死於嚴重子宮蓄膿，遺體被裝入麻布袋丟棄', alive: false, cause: '第 4 歲因子宮蓄膿死於鐵籠' }
+          ]
+        },
+        {
+          tier: 'mill',
+          tierName: '非法繁殖場 (12%)',
+          species: '犬',
+          name: '山區繁殖場的奶油貴賓種公',
+          location: '亞洲 · 偏遠繁殖場',
+          milestones: [
+            { month: 4, text: '為防止吠叫引來鄰居檢舉，在無麻醉狀態下被剪除聲帶', alive: true },
+            { month: 20, text: '終年未曾洗澡與修毛，全身毛髮糾結成硬塊並患有嚴重耳疥蟲', alive: true },
+            { month: 42, text: '繁殖場遭動保處突襲破獲，全身剃毛治療後由中途之家接手', alive: true },
+            { month: 120, text: '在領養家庭度過後半生，於 10 歲時在軟墊上安詳老死', alive: false, cause: '獲救後於第 10 歲安詳老死' }
+          ]
+        },
+        {
+          tier: 'elite',
+          tierName: '高收入家庭 SSR (8%)',
+          species: '犬',
+          name: '加州別墅的拉布拉多「Leo」',
+          location: '美國 · 加州',
+          milestones: [
+            { month: 4, text: '完成全套幼犬疫苗與晶片登記，進入專業導盲犬／陪伴犬寄養家庭', alive: true },
+            { month: 24, text: '在第 2 年完成高階訓練，每週末在私人海灘與草坪自由奔跑', alive: true },
+            { month: 90, text: '滿 7 歲接受定期牙科洗牙與關節保養，享用有機鮮食配餐', alive: true },
+            { month: 180, text: '活到 15 歲高齡，在全家人環繞與家庭獸醫協助下無痛善終', alive: false, cause: '第 15 歲高齡無痛善終' }
+          ]
+        },
+        {
+          tier: 'elite',
+          tierName: '高收入家庭 SSR (8%)',
+          species: '貓',
+          name: '蘇黎世公寓的緬因貓「Luna」',
+          location: '瑞士 · 蘇黎世',
+          milestones: [
+            { month: 6, text: '擁有整面實木貓牆與恆溫飲水系統，每日食用生肉營養餐', alive: true },
+            { month: 48, text: '寵物保險全額給付年度心臟超音波與血檢，健康指數滿分', alive: true },
+            { month: 132, text: '11 歲時在落地窗前的羊絨毯上安然度過每一個冬日午後', alive: true },
+            { month: 192, text: '享年 16 歲，於睡夢中毫無痛苦地走完一生', alive: false, cause: '第 16 歲於睡夢中壽終正寢' }
+          ]
+        }
+      ];
+
+      /* -------------------------------------------------------------------------- */
+      /* 5. COLD REALITY STATISTICAL QUOTES                                         */
+      /* -------------------------------------------------------------------------- */
+      const REALITY_QUOTES = [
+        '全球現存約 10 億隻伴侶犬貓中，有高達 75% 至 80% 屬於無主游蕩、街頭流浪或處於缺乏基本醫療的放養狀態。',
+        '全球每天有超過數十萬隻流浪動物因飢餓、傳染病、路殺與收容所超載撲殺而失去生命；多數街頭幼崽活不過第一個冬天。',
+        '在缺乏監管的商業繁殖場中，種母一生平均被迫生產 6 至 10 胎，多數終生未曾踩過泥土或草地，直到失去生育價值被淘汰。',
+        '研究顯示，街頭流浪犬貓的平均壽命僅約 1.5 至 3 年，不到室內妥善照護伴侶動物（13 至 16 年）的五分之一。',
+        '法國鬥牛犬、蘇格蘭摺耳貓等熱門品種的可愛外型背後，往往伴隨著人類刻意選育造成的終生呼吸道狹窄或軟骨發育不全劇痛。',
+        '在社群媒體演算法呈現的「幸福毛孩」背後，能享有定期健檢、寵物保險與善終照護的伴侶動物，僅佔全球總數不到 8%。'
+      ];
+
+      /* -------------------------------------------------------------------------- */
+      /* 6. APPLICATION STATE                                                       */
+      /* -------------------------------------------------------------------------- */
+      const State = {
+        currentView: 'intro', // 'intro' | 'roulette' | 'game' | 'ending'
+        soulNumber: 0,
+        tierKey: 'stray',
+        initialTierKey: 'stray',
+        character: null,
+        ageMonths: 0,
+        stepIndex: 0,
+        stats: {
+          autonomy: 50,
+          suffering: 20,
+          happiness: 50
+        },
+        peakSuffering: 20,
+        statsHistory: [], // Array of { month, autonomy, suffering, happiness }
+        tags: [],
+        usedEventIds: new Set(),
+        currentEvent: null,
+        awaitingNext: false,
+        deathInfo: null, // { cause, epitaph }
+        peers: [],
+        peerLogs: [],
+        lifeLogs: [],
+        pastLives: []
+      };
+
+      /* -------------------------------------------------------------------------- */
+      /* 7. HELPER FUNCTIONS                                                        */
+      /* -------------------------------------------------------------------------- */
+      function clamp(val, min = 0, max = 100) {
+        return Math.max(min, Math.min(max, Math.round(val)));
+      }
+
+      function formatSoulNumber(num) {
+        return '#' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+
+      function formatAge(months) {
+        if (months <= 0) return '初生 (第 0 個月)';
+        const yrs = Math.floor(months / 12);
+        const mos = months % 12;
+        if (yrs === 0) return `第 ${mos} 個月`;
+        if (mos === 0) return `第 ${yrs} 歲`;
+        return `${yrs} 歲 ${mos} 個月`;
+      }
+
+      function rollWeightedTier() {
+        const r = Math.random() * 100;
+        if (r < 45) return 'stray';
+        if (r < 80) return 'working';
+        if (r < 92) return 'mill';
+        return 'elite';
+      }
+
+      function loadHistoryFromStorage() {
+        try {
+          const raw = localStorage.getItem('companion_roulette_history_v1');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              State.pastLives = parsed;
+            }
+          }
+        } catch (e) {}
+        updateHistoryBadge();
+      }
+
+      function saveLifeToHistory(record) {
+        State.pastLives.unshift(record);
+        if (State.pastLives.length > 30) {
+          State.pastLives = State.pastLives.slice(0, 30);
+        }
+        try {
+          localStorage.setItem('companion_roulette_history_v1', JSON.stringify(State.pastLives));
+        } catch (e) {}
+        updateHistoryBadge();
+      }
+
+      function updateHistoryBadge() {
+        const badge = document.getElementById('historyCountBadge');
+        if (badge) badge.textContent = String(State.pastLives.length);
+      }
+
+      /* -------------------------------------------------------------------------- */
+      /* 8. VIEW SWITCHING & INITIALIZATION                                         */
+      /* -------------------------------------------------------------------------- */
+      function switchView(viewName) {
+        State.currentView = viewName;
+        const views = {
+          intro: document.getElementById('viewIntro'),
+          roulette: document.getElementById('viewRoulette'),
+          game: document.getElementById('viewGame'),
+          ending: document.getElementById('viewEnding')
+        };
+        Object.keys(views).forEach((k) => {
+          if (views[k]) {
+            if (k === viewName) {
+              views[k].classList.remove('hidden');
+            } else {
+              views[k].classList.add('hidden');
+            }
+          }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function generateThreePeers(excludeArchetypeTitle) {
+        // Pick 3 distinct peers from different tiers to highlight the stark contrast
+        const poolStray = PEER_TEMPLATES.filter((p) => p.tier === 'stray');
+        const poolWorking = PEER_TEMPLATES.filter((p) => p.tier === 'working');
+        const poolMill = PEER_TEMPLATES.filter((p) => p.tier === 'mill');
+        const poolElite = PEER_TEMPLATES.filter((p) => p.tier === 'elite');
+
+        const selected = [
+          poolStray[Math.floor(Math.random() * poolStray.length)],
+          poolMill[Math.floor(Math.random() * poolMill.length)],
+          Math.random() < 0.55
+            ? poolElite[Math.floor(Math.random() * poolElite.length)]
+            : poolWorking[Math.floor(Math.random() * poolWorking.length)]
+        ];
+
+        return selected.map((tpl, idx) => ({
+          id: 'peer_' + idx,
+          name: tpl.name,
+          species: tpl.species,
+          tier: tpl.tier,
+          tierName: tpl.tierName,
+          location: tpl.location,
+          alive: true,
+          deathCause: null,
+          currentStatus: '與你同一秒降生於地球，正在呼吸第一口空氣。',
+          milestones: tpl.milestones.slice(),
+          triggeredMonths: new Set()
+        }));
+      }
+
+      function startRoulette(forcedTierKey = null) {
+        SoundEngine.playStep();
+        const chosenTierKey = forcedTierKey || rollWeightedTier();
+        const tierObj = TIER_CONFIG[chosenTierKey];
+        const arch = tierObj.archetypes[Math.floor(Math.random() * tierObj.archetypes.length)];
+        const soulNum = Math.floor(Math.random() * 999999999) + 1;
+
+        switchView('roulette');
+        const counterEl = document.getElementById('rouletteCounter');
+        const tierLabelEl = document.getElementById('rouletteTierLabel');
+        const identityEl = document.getElementById('rouletteIdentity');
+
+        const allArchetypes = Object.values(TIER_CONFIG).flatMap((t) =>
+          t.archetypes.map((a) => ({ tierName: t.name, prob: t.probText, title: a.title }))
+        );
+
+        let ticks = 0;
+        const maxTicks = 14;
+        const interval = setInterval(() => {
+          ticks++;
+          SoundEngine.playTick(240 + ticks * 18, 0.03, 'sine', 0.03);
+          const randSample = allArchetypes[Math.floor(Math.random() * allArchetypes.length)];
+          const randId = Math.floor(Math.random() * 999999999) + 1;
+          counterEl.textContent = `${formatSoulNumber(randId)} / 1,000,000,000`;
+          tierLabelEl.textContent = `抽籤池檢索：${randSample.tierName} (${randSample.prob})`;
+          identityEl.textContent = randSample.title;
+
+          if (ticks >= maxTicks) {
+            clearInterval(interval);
+            counterEl.textContent = `${formatSoulNumber(soulNum)} / 1,000,000,000`;
+            tierLabelEl.textContent = `命運確認：${tierObj.name}（全球機率 ${tierObj.probText}）`;
+            identityEl.textContent = arch.title;
+            SoundEngine.playChoice();
+
+            setTimeout(() => {
+              initGameSession(chosenTierKey, arch, soulNum);
+            }, 650);
+          }
+        }, 70);
+      }
+
+      function initGameSession(tierKey, archetype, soulNum) {
+        State.soulNumber = soulNum;
+        State.tierKey = tierKey;
+        State.initialTierKey = tierKey;
+        State.character = archetype;
+        State.ageMonths = 0;
+        State.stepIndex = 0;
+        State.stats = {
+          autonomy: archetype.initStats.autonomy,
+          suffering: archetype.initStats.suffering,
+          happiness: archetype.initStats.happiness
+        };
+        State.peakSuffering = archetype.initStats.suffering;
+        State.statsHistory = [
+          {
+            month: 0,
+            autonomy: State.stats.autonomy,
+            suffering: State.stats.suffering,
+            happiness: State.stats.happiness
+          }
+        ];
+        State.tags = archetype.initTags.slice();
+        State.usedEventIds = new Set();
+        State.currentEvent = null;
+        State.awaitingNext = false;
+        State.deathInfo = null;
+        State.peers = generateThreePeers(archetype.title);
+        State.peerLogs = [
+          {
+            ageText: '初生 (0m)',
+            text: '地球上另外 3 隻與你同秒誕生的伴侶動物，已在不同角落睜開雙眼。'
+          }
+        ];
+        State.lifeLogs = [
+          {
+            ageText: '初生',
+            text: `降生為【${archetype.title}】。${archetype.desc}`
+          }
+        ];
+
+        switchView('game');
+        renderCharacterHeader();
+        renderStatsAndTags();
+        renderPeersPanel();
+        renderLifeLogs();
+        presentBirthIntroNode();
+      }
+
+      /* -------------------------------------------------------------------------- */
+      /* 9. GAMEPLAY RENDERING & NODE PROGRESSION                                   */
+      /* -------------------------------------------------------------------------- */
+      function renderCharacterHeader() {
+        const tierObj = TIER_CONFIG[State.tierKey];
+        const badgeEl = document.getElementById('gameTierBadge');
+        badgeEl.className = `text-[11px] font-mono px-2 py-0.5 rounded border ${tierObj.badgeClass}`;
+        badgeEl.textContent = `${tierObj.shortName} · ${tierObj.probText}`;
+
+        document.getElementById('gameSoulId').textContent = formatSoulNumber(State.soulNumber);
+        document.getElementById('gameCharTitle').textContent = State.character.title;
+        document.getElementById('gameCharSubtitle').textContent = `${State.character.location} ｜ 物種：${State.character.species}`;
+        document.getElementById('gameAgeDisplay').textContent = formatAge(State.ageMonths);
+      }
+
+      function renderStatsAndTags() {
+        const { autonomy, suffering, happiness } = State.stats;
+        document.getElementById('valAutonomy').textContent = String(autonomy);
+        document.getElementById('barAutonomy').style.width = `${autonomy}%`;
+
+        document.getElementById('valSuffering').textContent = String(suffering);
+        document.getElementById('barSuffering').style.width = `${suffering}%`;
+
+        document.getElementById('valHappiness').textContent = String(happiness);
+        document.getElementById('barHappiness').style.width = `${happiness}%`;
+
+        const alertBox = document.getElementById('sufferingAlert');
+        const sufferBox = document.getElementById('cardSufferingBox');
+        if (suffering >= 80) {
+          alertBox.classList.remove('hidden');
+          sufferBox.classList.add('border-[#8c4646]');
+        } else {
+          alertBox.classList.add('hidden');
+          sufferBox.classList.remove('border-[#8c4646]');
+        }
+
+        const tagsContainer = document.getElementById('liveTagsContainer');
+        tagsContainer.innerHTML = '<span class="text-[11px] text-textMuted mr-1">生命印記：</span>';
+        State.tags.forEach((tag) => {
+          const span = document.createElement('span');
+          span.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-bgElevated text-textMain/90 border border-borderMuted';
+          span.textContent = tag;
+          tagsContainer.appendChild(span);
+        });
+      }
+
+      function renderPeersPanel() {
+        const container = document.getElementById('peersContainer');
+        container.innerHTML = '';
+
+        State.peers.forEach((peer, i) => {
+          const card = document.createElement('div');
+          const statusColor = peer.alive
+            ? 'border-borderMuted/80 bg-bgMain/70'
+            : 'border-borderMuted/40 bg-bgMain/30 opacity-60';
+
+          card.className = `p-3 rounded border ${statusColor} transition`;
+          card.innerHTML = `
+            <div class="flex items-center justify-between text-[11px] font-mono mb-1">
+              <span class="text-textSub">同梯 #0${i + 1} · ${peer.tierName}</span>
+              <span class="${peer.alive ? 'text-barHappy' : 'text-[#c97a7a]'}">
+                ${peer.alive ? '● 存活中' : '✕ 已離世'}
+              </span>
+            </div>
+            <div class="font-serif text-xs sm:text-sm font-semibold text-textMain mb-1">${peer.name}</div>
+            <p class="text-xs text-textSub leading-relaxed">${peer.currentStatus}</p>
+          `;
+          container.appendChild(card);
+        });
+
+        const tickerList = document.getElementById('peerTickerList');
+        tickerList.innerHTML = '';
+        State.peerLogs.slice(0, 8).forEach((item) => {
+          const row = document.createElement('div');
+          row.className = 'p-2 rounded bg-bgMain/50 border border-borderMuted/40 text-textSub leading-relaxed';
+          row.innerHTML = `<span class="font-mono text-[10px] text-accentGold mr-1.5">[${item.ageText}]</span><span>${item.text}</span>`;
+          tickerList.appendChild(row);
+        });
+      }
+
+      function renderLifeLogs() {
+        const listEl = document.getElementById('lifeLogList');
+        const countEl = document.getElementById('logEntryCount');
+        countEl.textContent = `${State.lifeLogs.length} 筆紀錄`;
+        listEl.innerHTML = '';
+
+        State.lifeLogs.forEach((entry) => {
+          const div = document.createElement('div');
+          div.className = 'flex items-start gap-2 border-b border-borderMuted/30 pb-1.5 last:border-none';
+          div.innerHTML = `
+            <span class="font-mono text-[11px] text-textMuted shrink-0 min-w-[68px]">[${entry.ageText}]</span>
+            <span class="text-textSub leading-relaxed">${entry.text}</span>
+          `;
+          listEl.appendChild(div);
+        });
+      }
+
+      function presentBirthIntroNode() {
+        document.getElementById('eventStageLabel').textContent = 'STAGE 00 · 降生瞬間';
+        document.getElementById('eventLocationLabel').textContent = State.character.location;
+        document.getElementById('eventTitle').textContent = '睜開雙眼的第一口呼吸';
+
+        const narrativeEl = document.getElementById('eventNarrative');
+        narrativeEl.innerHTML = `
+          <p class="fade-in">${State.character.desc}</p>
+          <p class="fade-in text-textSub text-sm">
+            在全球 10 億隻伴侶動物的命運輪盤裡，你抽中了 <strong class="text-textMain">${TIER_CONFIG[State.tierKey].name}（佔比 ${TIER_CONFIG[State.tierKey].probText}）</strong>。你的初始自由度為 ${State.stats.autonomy}，痛苦值為 ${State.stats.suffering}，幸福感為 ${State.stats.happiness}。
+          </p>
+        `;
+
+        document.getElementById('eventOutcomeBox').classList.add('hidden');
+        const choicesContainer = document.getElementById('choicesContainer');
+        choicesContainer.innerHTML = '';
+
+        const btnNext = document.getElementById('btnNextNode');
+        const btnLabel = document.getElementById('btnNextNodeLabel');
+        btnLabel.textContent = '開始推進生命時間軸';
+        btnNext.classList.remove('hidden');
+        State.awaitingNext = true;
+      }
+
+      function updatePeersForMonth(currentMonth) {
+        State.peers.forEach((peer) => {
+          if (!peer.alive) return;
+          peer.milestones.forEach((m) => {
+            if (currentMonth >= m.month && !peer.triggeredMonths.has(m.month)) {
+              peer.triggeredMonths.add(m.month);
+              peer.currentStatus = m.text;
+              if (!m.alive) {
+                peer.alive = false;
+                peer.deathCause = m.cause || m.text;
+              }
+              State.peerLogs.unshift({
+                ageText: formatAge(m.month),
+                text: `同梯的【${peer.name}】${m.text}。`
+              });
+            }
+          });
+        });
+      }
+
+      function selectNextEventForState() {
+        const pool = EVENT_POOLS[State.tierKey] || EVENT_POOLS.stray;
+        const m = State.ageMonths;
+
+        // Filter unused events matching current age window
+        let candidates = pool.filter(
+          (ev) => !State.usedEventIds.has(ev.id) && m >= ev.minMonth && m <= ev.maxMonth
+        );
+
+        // Fallback to any unused event in current tier
+        if (candidates.length === 0) {
+          candidates = pool.filter((ev) => !State.usedEventIds.has(ev.id));
+        }
+
+        // If all events in this tier have been experienced, trigger natural lifespan conclusion
+        if (candidates.length === 0) {
+          return null;
+        }
+
+        const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+        State.usedEventIds.add(chosen.id);
+        return chosen;
+      }
+
+      function advanceToNextNode() {
+        SoundEngine.playStep();
+
+        // Check if character already died on the previous outcome
+        if (State.deathInfo) {
+          showEndingScreen();
+          return;
+        }
+
+        const tierObj = TIER_CONFIG[State.tierKey];
+        const schedule = tierObj.stepSchedule;
+        if (State.stepIndex < schedule.length) {
+          State.ageMonths = schedule[State.stepIndex];
+          State.stepIndex++;
+        } else {
+          State.ageMonths += 12;
+        }
+
+        // Update peers at this new timestamp
+        updatePeersForMonth(State.ageMonths);
+        renderCharacterHeader();
+        renderPeersPanel();
+
+        // Pick an event
+        const nextEv = selectNextEventForState();
+        if (!nextEv) {
+          // Natural end of life if all events exhausted
+          const naturalDeaths = {
+            stray: '在街頭度過無數個寒暑後，於熟悉的巷弄角落安詳老去',
+            working: '陪伴家庭走過十數載春秋，於睡夢中因高齡器官衰竭安詳辭世',
+            mill: '在漫長的鐵籠歲月後，因多重慢性疾病與器官衰竭靜靜離世',
+            elite: '走過漫長而備受寵愛的一生，在家人溫暖的懷抱中壽終正寢'
+          };
+          State.deathInfo = {
+            cause: naturalDeaths[State.tierKey],
+            epitaph: `時間走到了 ${formatAge(State.ageMonths)}。你的呼吸漸漸變得輕淺，所有的飢餓、疼痛或溫暖都化作最後一抹微光。`
+          };
+          showEndingScreen();
+          return;
+        }
+
+        State.currentEvent = nextEv;
+        State.awaitingNext = false;
+
+        // Render narrative & choices
+        document.getElementById('eventStageLabel').textContent = `AGE · ${formatAge(State.ageMonths)}`;
+        document.getElementById('eventLocationLabel').textContent = State.character.location;
+        document.getElementById('eventTitle').textContent = nextEv.title;
+
+        const narrativeEl = document.getElementById('eventNarrative');
+        narrativeEl.innerHTML = `<p class="fade-in">${nextEv.narrative}</p>`;
+
+        document.getElementById('eventOutcomeBox').classList.add('hidden');
+        document.getElementById('btnNextNode').classList.add('hidden');
+
+        const choicesContainer = document.getElementById('choicesContainer');
+        choicesContainer.innerHTML = '';
+
+        nextEv.choices.forEach((choice, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className =
+            'w-full text-left p-3.5 sm:p-4 rounded border border-borderMuted hover:border-textSub bg-bgMain/75 hover:bg-bgElevated/80 active:scale-[0.99] transition flex items-center justify-between gap-3 group';
+          btn.innerHTML = `
+            <span class="text-xs sm:text-sm text-textMain group-hover:text-white leading-relaxed">${choice.text}</span>
+            <span class="font-mono text-xs text-textMuted group-hover:text-textMain shrink-0">選擇 →</span>
+          `;
+          btn.addEventListener('click', () => handleChoiceSelection(choice));
+          choicesContainer.appendChild(btn);
+        });
+      }
+
+      function handleChoiceSelection(choice) {
+        if (State.awaitingNext) return;
+        SoundEngine.playChoice();
+        State.awaitingNext = true;
+
+        // Apply deltas
+        const dAuto = choice.deltas.autonomy || 0;
+        const dSuffer = choice.deltas.suffering || 0;
+        const dHappy = choice.deltas.happiness || 0;
+
+        State.stats.autonomy = clamp(State.stats.autonomy + dAuto);
+        State.stats.suffering = clamp(State.stats.suffering + dSuffer);
+        State.stats.happiness = clamp(State.stats.happiness + dHappy);
+
+        if (State.stats.suffering > State.peakSuffering) {
+          State.peakSuffering = State.stats.suffering;
+        }
+
+        State.statsHistory.push({
+          month: State.ageMonths,
+          autonomy: State.stats.autonomy,
+          suffering: State.stats.suffering,
+          happiness: State.stats.happiness
+        });
+
+        if (choice.tag && !State.tags.includes(choice.tag)) {
+          State.tags.push(choice.tag);
+        }
+
+        // Check tier transition (e.g. rescued or abandoned)
+        let transitionNote = '';
+        if (choice.transitionTo && TIER_CONFIG[choice.transitionTo]) {
+          State.tierKey = choice.transitionTo;
+          transitionNote = `（命運轉折：你的處境已轉變為「${TIER_CONFIG[State.tierKey].shortName}」）`;
+        }
+
+        // Determine mortality check
+        let effectiveDeathProb = choice.deathProb || 0;
+        if (State.stats.suffering >= 85 && effectiveDeathProb < 0.8) {
+          effectiveDeathProb += 0.25; // Health collapse penalty when suffering > 80
+        }
+        if (State.stats.suffering >= 100) {
+          effectiveDeathProb = 1.0;
+        }
+
+        const diedRoll = Math.random() < effectiveDeathProb;
+
+        // Render outcome feedback
+        const outcomeBox = document.getElementById('eventOutcomeBox');
+        const outcomeText = document.getElementById('eventOutcomeText');
+        const outcomeDeltas = document.getElementById('eventOutcomeDeltas');
+
+        outcomeText.textContent = choice.outcome + (transitionNote ? ' ' + transitionNote : '');
+
+        const formatDelta = (label, val, inverseColor = false) => {
+          if (!val) return '';
+          const sign = val > 0 ? `+${val}` : `${val}`;
+          let colorClass = 'text-textSub';
+          if (inverseColor) {
+            colorClass = val > 0 ? 'text-[#d48b8b]' : 'text-barHappy';
+          } else {
+            colorClass = val > 0 ? 'text-barHappy' : 'text-[#d48b8b]';
+          }
+          return `<span class="px-2 py-0.5 rounded bg-bgCard border border-borderMuted ${colorClass}">${label} ${sign}</span>`;
+        };
+
+        outcomeDeltas.innerHTML = [
+          formatDelta('自由度', dAuto, false),
+          formatDelta('痛苦值', dSuffer, true),
+          formatDelta('幸福感', dHappy, false),
+          choice.tag ? `<span class="px-2 py-0.5 rounded bg-bgElevated text-accentGold border border-accentGold/40">獲得標籤 ${choice.tag}</span>` : ''
+        ].join('');
+
+        outcomeBox.classList.remove('hidden');
+
+        // Log entry
+        State.lifeLogs.unshift({
+          ageText: formatAge(State.ageMonths),
+          text: `${State.currentEvent.title} — 選擇「${choice.text}」。${choice.outcome}`
+        });
+
+        // Clear choice buttons and show Next button
+        document.getElementById('choicesContainer').innerHTML = '';
+        const btnNext = document.getElementById('btnNextNode');
+        const btnNextLabel = document.getElementById('btnNextNodeLabel');
+
+        if (diedRoll) {
+          const finalCause =
+            choice.deathCause ||
+            (State.stats.suffering >= 85
+              ? '因長期累積的生理痛苦超過負荷，引發多重器官衰竭離世'
+              : '在脆弱的生命節點中不幸離世');
+
+          State.deathInfo = {
+            cause: finalCause,
+            epitaph: choice.outcome
+          };
+          btnNextLabel.textContent = '生命走向終點 — 查看一生結算海報';
+        } else {
+          btnNextLabel.textContent = '推進至下一時間節點';
+        }
+
+        btnNext.classList.remove('hidden');
+        renderCharacterHeader();
+        renderStatsAndTags();
+        renderLifeLogs();
+      }
+
+      /* -------------------------------------------------------------------------- */
+      /* 10. ENDING SCREEN & POSTER GENERATION                                      */
+      /* -------------------------------------------------------------------------- */
+      function buildTrajectorySvg(history) {
+        const w = 520;
+        const h = 90;
+        const padX = 10;
+        const padY = 10;
+        const pts = history.length > 1 ? history : [...history, history[0]];
+
+        const toPath = (key) => {
+          return pts
+            .map((pt, i) => {
+              const x = padX + (i / (pts.length - 1)) * (w - padX * 2);
+              const y = h - padY - (pt[key] / 100) * (h - padY * 2);
+              return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+            })
+            .join(' ');
+        };
+
+        return `
+          <svg viewBox="0 0 ${w} ${h}" class="w-full h-full overflow-visible">
+            <line x1="${padX}" y1="${h / 2}" x2="${w - padX}" y2="${h / 2}" stroke="#263040" stroke-dasharray="3 3" stroke-width="1" />
+            <path d="${toPath('autonomy')}" fill="none" stroke="#6e8898" stroke-width="2" stroke-linecap="round" />
+            <path d="${toPath('suffering')}" fill="none" stroke="#9e5a5a" stroke-width="2" stroke-linecap="round" />
+            <path d="${toPath('happiness')}" fill="none" stroke="#7d9c7b" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        `;
+      }
+
+      function showEndingScreen() {
+        SoundEngine.playDeath();
+
+        // Advance remaining peers to final outcome for full comparison
+        updatePeersForMonth(999);
+
+        const initTier = TIER_CONFIG[State.initialTierKey];
+        document.getElementById('endSoulId').textContent = formatSoulNumber(State.soulNumber);
+
+        const endTierBadge = document.getElementById('endTierBadge');
+        endTierBadge.className = `text-[11px] font-mono px-2 py-0.5 rounded border ${initTier.badgeClass}`;
+        endTierBadge.textContent = `出生階層：${initTier.name} (${initTier.probText})`;
+
+        document.getElementById('endSpeciesBadge').textContent = `物種：${State.character.species}`;
+        document.getElementById('endCharName').textContent = State.character.title;
+        document.getElementById('endCharOrigin').textContent = `${State.character.location} — ${State.character.desc}`;
+
+        const lifespanStr = formatAge(State.ageMonths);
+        document.getElementById('endLifespan').textContent = lifespanStr;
+        document.getElementById('endDeathCause').textContent = State.deathInfo ? State.deathInfo.cause : '自然老死';
+        document.getElementById('endEpitaph').textContent = State.deathInfo ? State.deathInfo.epitaph : '';
+
+        // Stats
+        document.getElementById('endStatAuto').textContent = String(State.stats.autonomy);
+        document.getElementById('endBarAuto').style.width = `${State.stats.autonomy}%`;
+
+        document.getElementById('endStatSuffer').textContent = String(State.peakSuffering);
+        document.getElementById('endBarSuffer').style.width = `${State.peakSuffering}%`;
+
+        document.getElementById('endStatHappy').textContent = String(State.stats.happiness);
+        document.getElementById('endBarHappy').style.width = `${State.stats.happiness}%`;
+
+        // SVG Trajectory
+        document.getElementById('endSvgChartContainer').innerHTML = buildTrajectorySvg(State.statsHistory);
+
+        // Tags
+        const endTagsEl = document.getElementById('endTagsList');
+        endTagsEl.innerHTML = '';
+        State.tags.forEach((t) => {
+          const span = document.createElement('span');
+          span.className = 'text-xs font-mono px-2.5 py-1 rounded bg-bgElevated text-textMain border border-borderMuted';
+          span.textContent = t;
+          endTagsEl.appendChild(span);
+        });
+
+        // Peers summary
+        const endPeersEl = document.getElementById('endPeersSummary');
+        endPeersEl.innerHTML = '';
+        State.peers.forEach((p, idx) => {
+          const row = document.createElement('div');
+          row.className = 'p-2.5 rounded bg-bgMain/70 border border-borderMuted/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1';
+          row.innerHTML = `
+            <div>
+              <span class="font-mono text-[11px] text-textMuted mr-1.5">同梯 #0${idx + 1}</span>
+              <span class="text-textMain font-medium">${p.name}</span>
+              <span class="text-[11px] text-textSub ml-1">(${p.tierName})</span>
+            </div>
+            <div class="text-[11px] font-mono ${p.alive ? 'text-barHappy' : 'text-[#d48b8b]'}">
+              ${p.deathCause || p.currentStatus}
+            </div>
+          `;
+          endPeersEl.appendChild(row);
+        });
+
+        // Cold reality quote
+        const quote = REALITY_QUOTES[Math.floor(Math.random() * REALITY_QUOTES.length)];
+        document.getElementById('endRealityQuote').textContent = quote;
+        document.getElementById('copyFeedbackToast').classList.add('hidden');
+
+        // Save to reincarnation history
+        saveLifeToHistory({
+          soulId: formatSoulNumber(State.soulNumber),
+          title: State.character.title,
+          tierName: initTier.shortName,
+          probText: initTier.probText,
+          lifespan: lifespanStr,
+          cause: State.deathInfo ? State.deathInfo.cause : '自然老死',
+          tags: State.tags.slice(0, 4)
+        });
+
+        switchView('ending');
+      }
+
+      function generateShareText() {
+        const initTier = TIER_CONFIG[State.initialTierKey];
+        const peerLines = State.peers
+          .map((p, i) => `  · 同梯#${i + 1} ${p.name}：${p.deathCause || p.currentStatus}`)
+          .join('\n');
+
+        return [
+          `【1 in 10 億：全球伴侶動物命運輪盤】`,
+          `靈魂編號：${formatSoulNumber(State.soulNumber)} / 1,000,000,000`,
+          `轉生身分：${State.character.title}`,
+          `出生階層：${initTier.name}（全球機率 ${initTier.probText}）`,
+          `享年：${formatAge(State.ageMonths)}`,
+          `生命終點：${State.deathInfo ? State.deathInfo.cause : '自然老死'}`,
+          `最終數值：自由度 ${State.stats.autonomy}｜峰值痛苦 ${State.peakSuffering}｜幸福指數 ${State.stats.happiness}`,
+          `一生印記：${State.tags.join(' ')}`,
+          `—— 同秒降生同梯對照 ——`,
+          peerLines,
+          `#1in10b #伴侶動物命運輪盤 #領養代替購買`
+        ].join('\n');
+      }
+
+      function copyShareTextToClipboard() {
+        const text = generateShareText();
+        const showSuccess = () => {
+          const toast = document.getElementById('copyFeedbackToast');
+          toast.classList.remove('hidden');
+          SoundEngine.playChoice();
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showSuccess).catch(() => {
+            fallbackCopy(text, showSuccess);
+          });
+        } else {
+          fallbackCopy(text, showSuccess);
+        }
+      }
+
+      function fallbackCopy(text, callback) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          if (callback) callback();
+        } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      /* -------------------------------------------------------------------------- */
+      /* 11. MODALS & UI EVENT BINDINGS                                             */
+      /* -------------------------------------------------------------------------- */
+      function renderHistoryModal() {
+        const container = document.getElementById('historyModalContent');
+        const summary = document.getElementById('historyStatsSummary');
+        summary.textContent = `累積轉生 ${State.pastLives.length} 次`;
+
+        if (State.pastLives.length === 0) {
+          container.innerHTML = `<div class="py-10 text-center text-textMuted">尚無轉生紀錄。點擊開局體驗你的第一次伴侶動物生命旅程。</div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        State.pastLives.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded bg-bgMain border border-borderMuted/80';
+          card.innerHTML = `
+            <div class="flex items-center justify-between text-[11px] font-mono text-textMuted mb-1">
+              <span>#${State.pastLives.length - idx} · ${item.soulId}</span>
+              <span class="text-textSub">${item.tierName} (${item.probText})</span>
+            </div>
+            <div class="font-serif text-sm font-semibold text-textMain">${item.title}</div>
+            <div class="text-xs text-textSub mt-1">享年：<strong class="text-textMain">${item.lifespan}</strong> ｜ 終點：<span class="text-[#d48b8b]">${item.cause}</span></div>
+            <div class="flex flex-wrap gap-1 mt-2">
+              ${(item.tags || []).map((t) => `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-bgElevated text-textSub">${t}</span>`).join('')}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      function bindEvents() {
+        // Start buttons
+        document.getElementById('btnStartRandom').addEventListener('click', () => {
+          startRoulette(null);
+        });
+
+        document.getElementById('btnToggleCustomTier').addEventListener('click', () => {
+          const panel = document.getElementById('customTierPanel');
+          panel.classList.toggle('hidden');
+          SoundEngine.playTick();
+        });
+
+        document.querySelectorAll('.btn-custom-tier').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const tier = btn.getAttribute('data-tier');
+            startRoulette(tier);
+          });
+        });
+
+        // Next node progression
+        document.getElementById('btnNextNode').addEventListener('click', () => {
+          advanceToNextNode();
+        });
+
+        // Ending actions
+        document.getElementById('btnCopyShareText').addEventListener('click', () => {
+          copyShareTextToClipboard();
+        });
+
+        document.getElementById('btnReincarnate').addEventListener('click', () => {
+          startRoulette(null);
+        });
+
+        // Audio toggle
+        const btnAudio = document.getElementById('btnAudioToggle');
+        btnAudio.addEventListener('click', () => {
+          SoundEngine.enabled = !SoundEngine.enabled;
+          btnAudio.textContent = SoundEngine.enabled ? '音效: 開' : '音效: 關';
+          if (SoundEngine.enabled) SoundEngine.playTick();
+        });
+
+        // Modals
+        const modalMatrix = document.getElementById('modalMatrix');
+        const modalHistory = document.getElementById('modalHistory');
+
+        document.getElementById('btnOpenMatrix').addEventListener('click', () => {
+          modalMatrix.classList.remove('hidden');
+          SoundEngine.playTick();
+        });
+        document.getElementById('btnCloseMatrix').addEventListener('click', () => {
+          modalMatrix.classList.add('hidden');
+        });
+
+        document.getElementById('btnOpenHistory').addEventListener('click', () => {
+          renderHistoryModal();
+          modalHistory.classList.remove('hidden');
+          SoundEngine.playTick();
+        });
+        document.getElementById('btnCloseHistory').addEventListener('click', () => {
+          modalHistory.classList.add('hidden');
+        });
+
+        document.getElementById('btnClearHistory').addEventListener('click', () => {
+          State.pastLives = [];
+          try {
+            localStorage.removeItem('companion_roulette_history_v1');
+          } catch (e) {}
+          updateHistoryBadge();
+          renderHistoryModal();
+        });
+
+        // Close modals on backdrop click or Escape key
+        [modalMatrix, modalHistory].forEach((m) => {
+          m.addEventListener('click', (e) => {
+            if (e.target === m) m.classList.add('hidden');
+          });
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            modalMatrix.classList.add('hidden');
+            modalHistory.classList.add('hidden');
+          }
+        });
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        loadHistoryFromStorage();
+        bindEvents();
+      });
+    })();
+  </script>
+</body>
+</html>
